@@ -13,10 +13,22 @@ export const getAllUsers = query({
   },
 });
 
-export const getUser = query({
+export const getUserConvexId = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.userId);
+  },
+});
+
+export const getUserById = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .first();
   },
 });
 
@@ -25,7 +37,6 @@ export const checkIfUserIsInDb = query({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      // @ts-ignore
       .withIndex("by_userId", (q) => q.eq("userId", args.id))
       .first();
 
