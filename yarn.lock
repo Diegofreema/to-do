@@ -4700,6 +4700,11 @@ expo-asset@~10.0.10:
     invariant "^2.2.4"
     md5-file "^3.2.3"
 
+expo-audio@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/expo-audio/-/expo-audio-0.3.0.tgz#b079aa4ae715280bfdaa9d727a020bd6575caff2"
+  integrity sha512-5YkaqunkHlNr4+KZSM3xuTnznLaaiiyLWCENmxJS5EAMgkXTWOoZBxoLLjquLU5m5clcswnYBriQBbUfbvZ+ug==
+
 expo-blur@~13.0.2:
   version "13.0.2"
   resolved "https://registry.yarnpkg.com/expo-blur/-/expo-blur-13.0.2.tgz#c2d179b19b13830db1d8b90c51373235f462e958"

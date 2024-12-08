@@ -1,5 +1,5 @@
 {
-  "name": "nekede",
+  "name": "FPNO",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -30,6 +30,7 @@
     "convex": "^1.17.3",
     "date-fns": "^4.1.0",
     "expo": "~51.0.39",
+    "expo-audio": "^0.3.0",
     "expo-blur": "~13.0.2",
     "expo-build-properties": "~0.12.5",
     "expo-constants": "~16.0.2",
