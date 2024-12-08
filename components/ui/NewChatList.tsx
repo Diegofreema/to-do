@@ -1,6 +1,7 @@
 import { FlatList, StyleSheet } from "react-native";
 import { NewConversationType, PaginateType } from "@/types";
 import { NewChatListItem } from "@/components/NewChatListItem";
+import { EmptyText } from "@/components/EmptyText";
 
 type Props = PaginateType & {
   results: NewConversationType[];
@@ -25,6 +26,7 @@ export const NewChatList = ({
       contentContainerStyle={styles.content}
       onEndReached={onLoadMore}
       onEndReachedThreshold={0.5}
+      ListEmptyComponent={() => <EmptyText text={"No student found"} />}
     />
   );
 };
@@ -32,5 +34,6 @@ export const NewChatList = ({
 const styles = StyleSheet.create({
   content: {
     gap: 15,
+    flexGrow: 1,
   },
 });

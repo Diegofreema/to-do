@@ -12,6 +12,7 @@ import { AvatarContent } from "@/components/ui/AvatarContent";
 import { Spacer } from "@/components/ui/Divider";
 import { useId } from "@/lib/zustand/useId";
 import { formatDistanceToNow } from "date-fns";
+import { UnreadCount } from "@/components/UnreadCount";
 
 type Props = {
   conversation: ConversationType;
@@ -82,13 +83,7 @@ export const Conversation = ({ conversation }: Props) => {
                 ago
               </Text>
             )}
-            {unread > 0 && (
-              <View style={styles.unread}>
-                <Text style={{ color: "white", fontFamily: "NunitoBold" }}>
-                  {unread}
-                </Text>
-              </View>
-            )}
+            {unread > 0 && <UnreadCount unread={unread} />}
           </View>
         </View>
       </Swipeable>
@@ -122,15 +117,5 @@ const styles = StyleSheet.create({
     gap: 10,
     alignItems: "center",
     width: "100%",
-  },
-  unread: {
-    alignSelf: "flex-end",
-    marginTop: "auto",
-    backgroundColor: colors.lightblue,
-    borderRadius: 20,
-    width: 20,
-    height: 20,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

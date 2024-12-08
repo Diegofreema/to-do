@@ -57,6 +57,31 @@ export const getUnreadMessages = query({
     return unseenMessages.length;
   },
 });
+export const getUnreadAllMessages = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .first();
+    if (!user) return 0;
+    const conversations = await ctx.db.query("conversations").collect();
+    if (!conversations) return 0;
+    const conversationThatLoggedInUserIsIn = conversations.filter((c) =>
+      c.participants.includes(user?._id),
+    );
+    const messagesThatUserHasNotRead = conversationThatLoggedInUserIsIn.map(
+      async (m) => {
+        return await getMessagesUnreadCount(ctx, m._id, user?._id);
+      },
+    );
+    const unread = await Promise.all(messagesThatUserHasNotRead);
+
+    return unread.reduce((acc, curr) => acc + curr, 0);
+  },
+});
 export const getOtherUsers = query({
   args: {
     faculty: v.string(),
@@ -199,4 +224,17 @@ export const createMessages = mutation({
 // helpers
 const getParticipants = async (ctx: QueryCtx, userId: Id<"users">) => {
   return await ctx.db.get(userId);
+};
+
+const getMessagesUnreadCount = async (
+  ctx: QueryCtx,
+  conversationId: Id<"conversations">,
+  userId: Id<"users">,
+) => {
+  const messages = await ctx.db
+    .query("messages")
+    .filter((q) => q.eq(q.field("conversationId"), conversationId))
+    .collect();
+  const unreadMessages = messages.filter((m) => !m.seenId.includes(userId));
+  return unreadMessages.length || 0;
 };

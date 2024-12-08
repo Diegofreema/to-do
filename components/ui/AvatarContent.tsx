@@ -17,6 +17,7 @@ export const AvatarContent = ({
   myMessage?: boolean;
   isOnline?: boolean;
 }) => {
+  console.log("dcnd ");
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
       <Image

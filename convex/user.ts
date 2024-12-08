@@ -12,7 +12,19 @@ export const getAllUsers = query({
       .collect();
   },
 });
-
+export const searchUsers = query({
+  args: {
+    search: v.string(),
+    id: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withSearchIndex("searchName", (q) => q.search("name", args.search))
+      .filter((q) => q.neq(q.field("_id"), args.id))
+      .collect();
+  },
+});
 export const getUserConvexId = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
