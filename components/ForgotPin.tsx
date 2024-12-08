@@ -101,6 +101,7 @@ export const ForgotForm = () => {
         description: "Otp has been sent to your mail",
       });
     } catch (error) {
+      console.log(error);
       onShow({
         message: "Failed",
         type: "error",
@@ -109,7 +110,7 @@ export const ForgotForm = () => {
     } finally {
       setSending(false);
     }
-  }, []);
+  }, [onShow, user.email]);
   useEffect(() => {
     resend();
   }, [resend]);

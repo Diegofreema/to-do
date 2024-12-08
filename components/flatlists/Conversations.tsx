@@ -1,12 +1,13 @@
 import { FlatList, StyleSheet } from "react-native";
-import { ConversationType } from "@/types";
+import { ConversationType, PaginateType } from "@/types";
 import { Conversation } from "@/components/ui/Conversation";
 import { Divider } from "@/components/ui/Divider";
 import { EmptyChat } from "@/components/ui/EmptyChat";
 
-type Props = {
+type Props = PaginateType & {
   conversations: ConversationType[];
 };
+
 export const Conversations = ({ conversations }: Props) => {
   return (
     <FlatList
@@ -22,7 +23,7 @@ export const Conversations = ({ conversations }: Props) => {
 
 const styles = StyleSheet.create({
   contentContainerStyle: {
-    gap: 20,
+    gap: 10,
     flexGrow: 1,
   },
 });

@@ -19,16 +19,42 @@ export const getUserConvexId = query({
     return await ctx.db.get(args.userId);
   },
 });
-
+export const setUserToOffline = mutation({
+  args: {
+    id: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      isOnline: false,
+    });
+  },
+});
+export const setUserToOnline = mutation({
+  args: {
+    id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.id))
+      .first();
+    if (!user) return;
+    await ctx.db.patch(user._id, {
+      isOnline: true,
+    });
+  },
+});
 export const getUserById = query({
   args: {
     userId: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const user = await ctx.db
       .query("users")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
+    console.log(user, "back");
+    return user;
   },
 });
 

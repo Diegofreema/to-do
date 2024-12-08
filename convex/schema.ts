@@ -22,13 +22,15 @@ export const Conversation = {
   type: v.string(),
   lastMessage: v.optional(v.string()),
   participants: v.array(v.id("users")),
+  lastMessageTime: v.optional(v.number()),
+  lastMessageSenderId: v.optional(v.id("users")),
 };
 
 export const Message = {
   senderId: v.id("users"),
   recipient: v.id("users"),
   conversationId: v.id("conversations"),
-  isEdited: v.boolean(),
+  isEdited: v.optional(v.boolean()),
   content: v.string(),
   contentType: v.string(),
   seenId: v.array(v.id("users")),
@@ -41,6 +43,8 @@ export default defineSchema({
     .index("by_name", ["name"])
     .index("by_userId", ["userId"]),
   conversations: defineTable(Conversation),
-  messages: defineTable(Message),
+  messages: defineTable(Message)
+    .index("by_conversationId", ["conversationId"])
+    .index("by_conversationId_recipient", ["conversationId", "recipient"]),
   conversationParticipants: defineTable(ConversationParticipants),
 });

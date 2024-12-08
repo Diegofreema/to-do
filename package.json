@@ -18,6 +18,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@convex-dev/react-query": "^0.0.0-alpha.8",
     "@expo/vector-icons": "^14.0.2",
     "@gorhom/bottom-sheet": "^5",
     "@hookform/resolvers": "^3.9.1",

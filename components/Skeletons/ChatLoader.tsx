@@ -3,10 +3,10 @@ import { MotiView } from "moti";
 import { Skeleton } from "moti/skeleton";
 import { colors } from "@/constants";
 
-export const ChatLoader = () => {
+export const ChatLoader = ({ length = 10 }: { length?: number }) => {
   return (
     <FlatList
-      data={[...Array(10)].map((_, i) => i)}
+      data={[...Array(length)].map((_, i) => i)}
       renderItem={() => (
         <MotiView
           transition={{

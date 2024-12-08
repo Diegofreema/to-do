@@ -4,13 +4,6 @@ import { IconArchive } from "@tabler/icons-react-native";
 import React from "react";
 
 export function LegacyRightAction(prog: any, drag: any, onPress: () => void) {
-  prog.addListener((value: any) => {
-    console.log("[L] showRightProgress:", value.value);
-  });
-  drag.addListener((value: any) => {
-    console.log("[L] appliedTranslation:", value.value);
-  });
-
   const trans = Animated.add(drag, 50);
 
   return (
