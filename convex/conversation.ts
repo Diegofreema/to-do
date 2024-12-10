@@ -22,16 +22,18 @@ export const getConversations = query({
 
     return {
       ...conversations,
-      page: conversations.page.map((c) => {
-        return {
-          id: c._id,
-          lastMessage: c.lastMessage,
-          name: c.name,
-          lastMessageTime: c.lastMessageTime,
-          otherUserId: c.participants.find((p) => p !== args.userId),
-          lastMessageSenderId: c.lastMessageSenderId,
-        };
-      }),
+      page: conversations.page
+        .filter((m) => m.participants.includes(args.userId))
+        .map((c) => {
+          return {
+            id: c._id,
+            lastMessage: c.lastMessage,
+            name: c.name,
+            lastMessageTime: c.lastMessageTime,
+            otherUserId: c.participants.find((p) => p !== args.userId),
+            lastMessageSenderId: c.lastMessageSenderId,
+          };
+        }),
     };
   },
 });

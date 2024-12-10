@@ -11,31 +11,27 @@ export const ChatSkeletonUI = () => {
       {/* Header Skeleton */}
       <View style={styles.header}>
         <Skeleton colorMode="light" width={48} height={48} radius="round" />
-        <View style={styles.headerTextContainer}>
+        <MotiView
+          transition={{ type: "timing" }}
+          style={styles.headerTextContainer}
+        >
           <Skeleton colorMode="light" width={120} height={16} />
           <View style={styles.headerSubtitle}>
             <Skeleton colorMode="light" width={80} height={12} />
           </View>
-        </View>
+        </MotiView>
       </View>
 
       {/* Messages Skeleton */}
       <View style={styles.messagesContainer}>
         {[1, 2, 3, 4, 5, 6].map((_, index) => (
           <MotiView
+            transition={{ type: "timing" }}
             key={index}
             style={[
               styles.messageSkeleton,
               index % 2 === 0 ? styles.leftMessage : styles.rightMessage,
             ]}
-            animate={{
-              opacity: [0.5, 1],
-              translateY: [10, 0],
-            }}
-            transition={{
-              type: "timing",
-              duration: 500,
-            }}
           >
             <Skeleton
               colorMode="light"
@@ -49,18 +45,20 @@ export const ChatSkeletonUI = () => {
 
       {/* Input Skeleton */}
       <View style={styles.inputContainer}>
-        <View style={styles.inputIcon}>
+        <MotiView transition={{ type: "timing" }} style={styles.inputIcon}>
           <Skeleton colorMode="light" width={40} height={40} radius="round" />
-        </View>
-        <Skeleton
-          colorMode="light"
-          width={width - 120}
-          height={40}
-          radius={20}
-        />
-        <View style={styles.inputSendIcon}>
+        </MotiView>
+        <MotiView>
+          <Skeleton
+            colorMode="light"
+            width={width - 120}
+            height={40}
+            radius={20}
+          />
+        </MotiView>
+        <MotiView transition={{ type: "timing" }} style={styles.inputSendIcon}>
           <Skeleton colorMode="light" width={40} height={40} radius="round" />
-        </View>
+        </MotiView>
       </View>
     </View>
   );

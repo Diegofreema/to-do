@@ -1,7 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import { Swipeable } from "react-native-gesture-handler";
-import { LegacyRightAction } from "@/components/RightAction";
+// import { LegacyRightAction } from "@/components/RightAction";
 import { colors } from "@/constants";
 import React, { useRef } from "react";
 import { ConversationType } from "@/types";
@@ -46,18 +46,18 @@ export const Conversation = ({ conversation }: Props) => {
 
   return (
     <TouchableOpacity
-      activeOpacity={0.9}
+      activeOpacity={0.5}
       onPress={() => router.push(`/singleChat/${conversation.otherUserId}`)}
     >
-      <Swipeable
-        ref={legacyRef}
-        friction={2}
-        enableTrackpadTwoFingerGesture
-        rightThreshold={40}
-        renderRightActions={(progress, dragX) =>
-          LegacyRightAction(progress, dragX, onPress)
-        }
-        containerStyle={styles.swipeable}
+      <View
+        // ref={legacyRef}
+        // friction={2}
+        // enableTrackpadTwoFingerGesture
+        // rightThreshold={40}
+        // renderRightActions={(progress, dragX) =>
+        //   LegacyRightAction(progress, dragX, onPress)
+        // }
+        style={styles.swipeable}
       >
         <View
           style={{
@@ -86,7 +86,7 @@ export const Conversation = ({ conversation }: Props) => {
             {unread > 0 && <UnreadCount unread={unread} />}
           </View>
         </View>
-      </Swipeable>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -97,25 +97,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   swipeable: {
-    backgroundColor: "white",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    elevation: 3,
-
-    borderRadius: 8,
-    marginTop: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 15,
     flexDirection: "row",
     gap: 10,
     alignItems: "center",
-    width: "100%",
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
 });

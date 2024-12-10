@@ -38,12 +38,6 @@
             "enableShrinkResourcesInReleaseBuilds": true
           }
         }
-      ],
-      [
-        "expo-audio",
-        {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
-        }
       ]
     ],
     "experiments": {
@@ -51,8 +45,15 @@
     },
     "extra": {
       "eas": {
-        "projectId": "5c9142c4-2421-4e93-a4d8-79dbfeae5102"
+        "projectId": "4cc2df4f-c1a1-40d5-a034-186a7a92a5cc"
+      },
+      "router": {
+        "origin": false
       }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/4cc2df4f-c1a1-40d5-a034-186a7a92a5cc"
     }
   }
 }

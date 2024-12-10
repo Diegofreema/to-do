@@ -17,7 +17,7 @@ export const Conversations = ({ conversations }: Props) => {
     <FlatList
       ListHeaderComponent={() => (
         <TouchableOpacity
-          style={styles.container}
+          style={[styles.container]}
           onPress={() => router.push("/search-conversations")}
         >
           <IconSearch color={colors.black} size={30} />
@@ -39,6 +39,11 @@ const styles = StyleSheet.create({
   contentContainerStyle: {
     gap: 10,
     flexGrow: 1,
+    backgroundColor: colors.white,
+    marginTop: 10,
+    paddingHorizontal: 10,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
   },
   container: {
     flexDirection: "row",
@@ -50,7 +55,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 5,
     backgroundColor: colors.white,
-    marginTop: 10,
     padding: 5,
   },
   input: {

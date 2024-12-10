@@ -10,14 +10,17 @@ export const AvatarContent = ({
   text,
   myMessage,
   isOnline,
+  color = "black",
+  chat,
 }: {
   image: string;
   name: string;
   text?: string;
   myMessage?: boolean;
   isOnline?: boolean;
+  color?: string;
+  chat?: boolean;
 }) => {
-  console.log("dcnd ");
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
       <Image
@@ -31,14 +34,28 @@ export const AvatarContent = ({
         <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
           <Text
             style={{
-              color: "black",
+              color,
               fontSize: RFPercentage(1.7),
               fontFamily: "NunitoRegular",
             }}
           >
             {name}
           </Text>
-          {isOnline && <View style={styles.online} />}
+          {isOnline && !chat && <View style={styles.online} />}
+        </View>
+        <View style={{ flexDirection: "row", gap: 3, alignItems: "center" }}>
+          {chat && (
+            <Text
+              style={{
+                color: "white",
+                fontFamily: "NunitoRegular",
+                fontSize: 12,
+              }}
+            >
+              {isOnline ? "Online" : "Offline"}
+            </Text>
+          )}
+          {isOnline && chat && <View style={styles.online} />}
         </View>
         <View style={{ flexDirection: "row", gap: 3, alignItems: "center" }}>
           {myMessage && <IconCheck color={colors.lightblue} size={20} />}
