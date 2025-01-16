@@ -1,15 +1,30 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
+import { Id } from "@/convex/_generated/dataModel";
 
 export const getAllUsers = query({
   args: {
-    loggedInUser: v.id("users"),
+    loggedInUser: v.string(),
+    department: v.string(),
+    faculty: v.string(),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const result = await ctx.db
       .query("users")
-      .filter((q) => q.neq(q.field("_id"), args.loggedInUser))
-      .collect();
+      .withIndex("by_department_faculty", (q) =>
+        q.eq("department", args.department).eq("faculty", args.faculty),
+      )
+      .filter((q) => q.neq(q.field("userId"), args.loggedInUser))
+      .paginate(args.paginationOpts);
+
+    return {
+      ...result,
+      page: result.page.map((r) => ({
+        ...r,
+      })),
+    };
   },
 });
 export const searchUsers = query({
@@ -61,12 +76,10 @@ export const getUserById = query({
     userId: v.string(),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.db
+    return await ctx.db
       .query("users")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
-    console.log(user, "back");
-    return user;
   },
 });
 
@@ -98,3 +111,8 @@ export const addUserToDb = mutation({
     });
   },
 });
+
+// helpers
+export const getUser = async (ctx: QueryCtx, userId: Id<"users">) => {
+  return await ctx.db.get(userId);
+};

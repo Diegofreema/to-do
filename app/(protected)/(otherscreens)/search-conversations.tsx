@@ -21,7 +21,7 @@ import { EmptyText } from "@/components/EmptyText";
 const SearchConversations = () => {
   const { top } = useSafeAreaInsets();
   const id = useId((state) => state.id!);
-  console.log(id);
+
   const [search, setSearch] = useState("");
   const [value] = useDebounce(search, 1000);
   const userList = useQuery(
@@ -44,6 +44,9 @@ const SearchConversations = () => {
   );
   const emptyText =
     value === "" ? "" : "No student found, try a different name";
+  const onNav = (id: string) => {
+    router.push(`/singleChat/${id}`);
+  };
   return (
     <Wrapper styles={{ marginTop: top }}>
       <View style={styles.container}>
@@ -59,7 +62,9 @@ const SearchConversations = () => {
       </View>
       <FlatList
         data={users}
-        renderItem={({ item }) => <NewChatListItem user={item} />}
+        renderItem={({ item }) => (
+          <NewChatListItem user={item} onPress={() => onNav(item.id)} />
+        )}
         contentContainerStyle={{ gap: 15, flexGrow: 1 }}
         ListEmptyComponent={() => <EmptyText text={emptyText} />}
       />

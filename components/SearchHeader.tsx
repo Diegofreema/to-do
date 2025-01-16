@@ -6,12 +6,14 @@ import { router } from "expo-router";
 
 type Props = {
   title?: string;
+  onPress?: () => void;
 };
 
-export const SearchHeader = ({ title = "Select student" }: Props) => {
+export const SearchHeader = ({ title = "Select student", onPress }: Props) => {
   return (
     <NavHeader
       title={title}
+      onPress={onPress}
       leftContent={() => (
         <LeftContent onPress={() => router.push("/search-conversations")} />
       )}

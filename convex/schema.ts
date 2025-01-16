@@ -19,16 +19,18 @@ export const ConversationParticipants = {
 };
 export const Conversation = {
   name: v.optional(v.string()),
-  type: v.string(),
+  type: v.union(v.literal("single"), v.literal("group")),
   lastMessage: v.optional(v.string()),
   participants: v.array(v.id("users")),
   lastMessageTime: v.optional(v.number()),
   lastMessageSenderId: v.optional(v.id("users")),
+  adminMembers: v.optional(v.array(v.id("users"))),
+  createdBy: v.optional(v.string()),
 };
 
 export const Message = {
   senderId: v.id("users"),
-  recipient: v.id("users"),
+  recipient: v.union(v.id("users"), v.array(v.id("users"))),
   conversationId: v.id("conversations"),
   isEdited: v.optional(v.boolean()),
   content: v.string(),
@@ -45,7 +47,7 @@ export default defineSchema({
     .searchIndex("searchName", {
       searchField: "name",
     }),
-  conversations: defineTable(Conversation),
+  conversations: defineTable(Conversation).index("type", ["type"]),
   messages: defineTable(Message)
     .index("by_conversationId", ["conversationId"])
     .index("by_conversationId_recipient", ["conversationId", "recipient"]),

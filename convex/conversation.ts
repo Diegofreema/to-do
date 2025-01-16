@@ -2,6 +2,7 @@ import { mutation, query, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "@/convex/_generated/dataModel";
 import { paginationOptsValidator } from "convex/server";
+import { getUser } from "@/convex/user";
 
 export const getConversations = query({
   args: {
@@ -11,29 +12,74 @@ export const getConversations = query({
   handler: async (ctx, args) => {
     const conversations = await ctx.db
       .query("conversations")
-      .filter((q) =>
-        q.and(
-          q.neq(q.field("lastMessage"), undefined),
-          q.eq(q.field("type"), "single"),
-        ),
-      )
+      .withIndex("type", (q) => q.eq("type", "single"))
+      .filter((q) => q.neq(q.field("lastMessage"), undefined))
       .order("desc")
       .paginate(args.paginationOpts);
+    const page = await Promise.all(
+      conversations.page
+        .filter((m) => m.participants.includes(args.userId))
+        .map(async (c) => {
+          const user = c.participants.find((p) => p !== args.userId);
 
+          if (!user) {
+            throw new Error("No other participant found in conversation");
+            // or handle this case differently based on your requirements
+          }
+
+          const otherUser = await getUser(ctx, user);
+
+          return {
+            id: c._id,
+            lastMessage: c.lastMessage,
+            lastMessageTime: c.lastMessageTime,
+            otherUser,
+            lastMessageSenderId: c.lastMessageSenderId,
+          };
+        }),
+    );
     return {
       ...conversations,
-      page: conversations.page
+      page,
+    };
+  },
+});
+export const getGroupConversations = query({
+  args: {
+    userId: v.id("users"),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const conversations = await ctx.db
+      .query("conversations")
+      .withIndex("type", (q) => q.eq("type", "group"))
+      .order("desc")
+      .paginate(args.paginationOpts);
+    const page = await Promise.all(
+      conversations.page
         .filter((m) => m.participants.includes(args.userId))
-        .map((c) => {
+        .map(async (c) => {
+          // Make this callback async
+          const users = c.participants.filter((item) => item !== args.userId);
+          const otherUsers = await Promise.all(
+            // Await the array of promises
+            users.map(async (u) => await getUser(ctx, u)),
+          );
+
           return {
             id: c._id,
             lastMessage: c.lastMessage,
             name: c.name,
             lastMessageTime: c.lastMessageTime,
-            otherUserId: c.participants.find((p) => p !== args.userId),
+            otherUsers, // Now this will be resolved user data
             lastMessageSenderId: c.lastMessageSenderId,
+            createdBy: c.createdBy!,
           };
         }),
+    );
+    return {
+      ...conversations,
+      page,
     };
   },
 });
@@ -51,7 +97,7 @@ export const getUnreadMessages = query({
       )
       .filter((q) => q.neq(q.field("senderId"), args.userId))
       .collect();
-    console.log(messages);
+
     const unseenMessages = messages.filter(
       (m) => !m.seenId.includes(args.userId),
     );
@@ -134,7 +180,6 @@ export const getSingleConversationWithMessages = query({
   handler: async (ctx, args) => {
     const conversations = await ctx.db.query("conversations").collect();
     if (!conversations) return null;
-    console.log(conversations.length);
     const conversation = conversations.find(
       (c) =>
         (c.participants.length === 2 &&
@@ -149,21 +194,85 @@ export const getSingleConversationWithMessages = query({
     return { conversation, otherUser };
   },
 });
+export const getGroupConversation = query({
+  args: { conversationId: v.id("conversations"), loggedInUser: v.id("users") },
+  handler: async (ctx, { conversationId, loggedInUser }) => {
+    const conversation = await ctx.db.get(conversationId);
+
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    if (!conversation.participants) {
+      throw new Error("No participants found");
+    }
+
+    const otherUsers = await Promise.all(
+      conversation.participants
+        .filter((participantId) => participantId !== loggedInUser) // Remove current user
+        .map(async (participantId) => {
+          return await getUser(ctx, participantId);
+        }),
+    );
+
+    return {
+      ...conversation,
+      otherUsers,
+    };
+  },
+});
 export const getMessages = query({
   args: {
     conversationId: v.optional(v.id("conversations")),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    if (!args.conversationId) return [];
     const messages = await ctx.db
       .query("messages")
       .withIndex("by_conversationId", (q) =>
         q.eq("conversationId", args.conversationId!),
       )
-      .take(300);
+      .order("desc")
+      .paginate(args.paginationOpts);
 
-    if (!messages) return [];
-    return messages.reverse() || [];
+    return {
+      ...messages,
+      page: messages.page.map((m) => ({
+        ...m,
+      })),
+    };
+  },
+});
+export const getGroupMessages = query({
+  args: {
+    conversationId: v.optional(v.id("conversations")),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversationId", (q) =>
+        q.eq("conversationId", args.conversationId!),
+      )
+      .order("desc")
+      .paginate(args.paginationOpts);
+    const page = await Promise.all(
+      messages.page.map(async (m) => {
+        const sender = await getUser(ctx, m.senderId);
+        if (!sender) {
+          throw new Error("Couldn't get user details");
+        }
+
+        return {
+          ...m,
+          senderName: sender.name,
+        };
+      }),
+    );
+    return {
+      ...messages,
+      page,
+    };
   },
 });
 // mutations
@@ -177,6 +286,23 @@ export const createSingleConversation = mutation({
     await ctx.db.insert("conversations", {
       participants: [args.loggedInUserId, args.otherUserId],
       type: "single",
+    });
+  },
+});
+export const createGroup = mutation({
+  args: {
+    members: v.array(v.id("users")),
+    name: v.string(),
+    admin: v.id("users"),
+    createdBy: v.string(),
+  },
+  handler: async (ctx, { members, name, admin, createdBy }) => {
+    await ctx.db.insert("conversations", {
+      participants: [...members],
+      type: "group",
+      name: name,
+      adminMembers: [admin],
+      createdBy,
     });
   },
 });
@@ -204,7 +330,7 @@ export const addSeenId = mutation({
 export const createMessages = mutation({
   args: {
     senderId: v.id("users"),
-    recipient: v.id("users"),
+    recipient: v.union(v.id("users"), v.array(v.id("users"))),
     conversationId: v.id("conversations"),
     content: v.string(),
     parentMessageId: v.optional(v.id("messages")),

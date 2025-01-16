@@ -1,22 +1,21 @@
-import React from "react";
 import { FlatList, StyleSheet } from "react-native";
-
-import { ConversationType, PaginateType } from "@/types";
-import { Conversation } from "@/components/ui/Conversation";
+import { GroupConversationType, PaginateType } from "@/types";
 import { Divider } from "@/components/ui/Divider";
 import { EmptyChat } from "@/components/ui/EmptyChat";
+import React from "react";
 import { colors } from "@/constants";
+import { GroupConversation } from "@/components/GroupConvo";
 
 type Props = PaginateType & {
-  conversations: ConversationType[];
+  data: GroupConversationType[];
 };
-
-export const Conversations = ({
-  conversations,
+export const GroupConversations = ({
+  status,
   loadMore,
   isLoading,
-  status,
+  data,
 }: Props) => {
+  console.log(data);
   const handleLoadMore = () => {
     if (status === "CanLoadMore" && !isLoading) {
       loadMore(20);
@@ -24,8 +23,8 @@ export const Conversations = ({
   };
   return (
     <FlatList
-      data={conversations}
-      renderItem={({ item }) => <Conversation conversation={item} />}
+      data={data}
+      renderItem={({ item }) => <GroupConversation conversation={item} />}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.contentContainerStyle}
       ItemSeparatorComponent={() => <Divider />}

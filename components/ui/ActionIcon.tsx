@@ -7,19 +7,25 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 type Props = {
   icon: Icon;
   onPress: () => void;
-  text: string;
+  text?: string;
 };
 
 export const ActionIcon = ({ icon: Icon, onPress, text }: Props) => {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={styles.container}
+      activeOpacity={0.8}
+    >
       <View style={styles.iconContainer}>
         <Icon color={colors.white} size={25} />
       </View>
-      <Title
-        text={text}
-        textStyle={{ color: colors.black, fontSize: RFPercentage(2.5) }}
-      />
+      {text && (
+        <Title
+          text={text}
+          textStyle={{ color: colors.black, fontSize: RFPercentage(2.5) }}
+        />
+      )}
     </TouchableOpacity>
   );
 };

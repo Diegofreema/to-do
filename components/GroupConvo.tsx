@@ -1,35 +1,41 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { router } from "expo-router";
-// import { LegacyRightAction } from "@/components/RightAction";
-import { colors } from "@/constants";
-import React from "react";
-import { ConversationType } from "@/types";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { GroupConversationType } from "@/types";
+import { useId } from "@/lib/zustand/useId";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { router } from "expo-router";
 import { AvatarContent } from "@/components/ui/AvatarContent";
-import { useId } from "@/lib/zustand/useId";
 import { formatDistanceToNow } from "date-fns";
 import { UnreadCount } from "@/components/UnreadCount";
+import React from "react";
+import { colors } from "@/constants";
 
-type Props = {
-  conversation: ConversationType;
+type GroupConvoProps = {
+  conversation: GroupConversationType;
 };
-export const Conversation = ({ conversation }: Props) => {
+export const GroupConversation = ({ conversation }: GroupConvoProps) => {
   const id = useId((state) => state.id);
 
   const unread = useQuery(api.conversation.getUnreadMessages, {
     conversationId: conversation.id,
     userId: id!,
   });
-  const { otherUser, lastMessageSenderId, lastMessage, lastMessageTime } =
-    conversation;
+  const {
+    otherUsers,
+    name,
+    lastMessageSenderId,
+    lastMessage,
+    lastMessageTime,
+    createdBy,
+  } = conversation;
 
   const isMine = lastMessageSenderId === id;
   const unreadCount = unread ?? 0;
+  const text = lastMessage || `Created by ${createdBy}`;
   return (
     <TouchableOpacity
       activeOpacity={0.5}
-      onPress={() => router.push(`/singleChat/${otherUser?._id}`)}
+      onPress={() => router.push(`/group-chat/${conversation.id}`)}
     >
       <View style={styles.swipeable}>
         <View
@@ -41,11 +47,10 @@ export const Conversation = ({ conversation }: Props) => {
           }}
         >
           <AvatarContent
-            name={otherUser?.name || ""}
-            image={otherUser?.image!}
-            text={lastMessage}
+            name={name || ""}
+            image={[...otherUsers?.map((u) => u?.image!)]}
+            text={text}
             myMessage={isMine}
-            isOnline={otherUser?.isOnline}
           />
           <View style={{ marginTop: 10 }}>
             {lastMessageTime && (
@@ -62,7 +67,6 @@ export const Conversation = ({ conversation }: Props) => {
     </TouchableOpacity>
   );
 };
-
 const styles = StyleSheet.create({
   separator: {
     width: "100%",

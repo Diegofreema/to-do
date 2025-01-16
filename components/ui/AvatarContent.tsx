@@ -3,6 +3,7 @@ import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { IconCheck } from "@tabler/icons-react-native";
 import { colors } from "@/constants";
+import { AvatarPile } from "@/components/ui/AvatarPile";
 
 export const AvatarContent = ({
   image,
@@ -13,7 +14,7 @@ export const AvatarContent = ({
   color = "black",
   chat,
 }: {
-  image: string;
+  image: string | string[];
   name: string;
   text?: string;
   myMessage?: boolean;
@@ -23,13 +24,17 @@ export const AvatarContent = ({
 }) => {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-      <Image
-        contentFit={"cover"}
-        placeholderContentFit={"cover"}
-        placeholder={require("@/assets/images/place-user.jpeg")}
-        style={{ width: 60, height: 60, borderRadius: 50 }}
-        source={{ uri: image }}
-      />
+      {Array.isArray(image) ? (
+        <AvatarPile avatars={image} />
+      ) : (
+        <Image
+          contentFit={"cover"}
+          placeholderContentFit={"cover"}
+          placeholder={require("@/assets/images/place-user.jpeg")}
+          style={{ width: 60, height: 60, borderRadius: 50 }}
+          source={{ uri: image }}
+        />
+      )}
       <View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
           <Text
