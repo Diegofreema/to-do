@@ -9,6 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 import { UnreadCount } from "@/components/UnreadCount";
 import React from "react";
 import { colors } from "@/constants";
+import { trimText } from "@/helper";
 
 type GroupConvoProps = {
   conversation: GroupConversationType;
@@ -49,7 +50,7 @@ export const GroupConversation = ({ conversation }: GroupConvoProps) => {
           <AvatarContent
             name={name || ""}
             image={[...otherUsers?.map((u) => u?.image!)]}
-            text={text}
+            text={trimText(text, 15)}
             myMessage={isMine}
           />
           <View style={{ marginTop: 10 }}>

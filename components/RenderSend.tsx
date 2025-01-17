@@ -1,36 +1,73 @@
-import { View } from "react-native";
+import { ActivityIndicator, StyleSheet } from "react-native";
 import { colors } from "@/constants";
 import { IconSend } from "@tabler/icons-react-native";
 import { IMessage, Send, SendProps } from "react-native-gifted-chat";
 import React from "react";
-
 type Props = SendProps<IMessage> & {
-  text: string;
+  disabled: boolean;
+  sending: boolean;
+  image: boolean;
 };
-export const RenderSend = ({ text, ...props }: Props) => {
+export const RenderSend = ({
+  disabled,
+  sending,
+  image,
+  onSend,
+  text,
+  sendButtonProps,
+  ...props
+}: Props) => {
+  const customSendPress = (
+    onSend:
+      | ((
+          messages: Partial<IMessage> | Partial<IMessage>[],
+          shouldResetInputToolbar: boolean,
+        ) => void)
+      | undefined,
+    text?: string,
+  ) => {
+    if (image && !text && onSend) {
+      onSend({ text: text?.trim() }, true);
+    } else if (text && onSend) {
+      onSend({ text: text.trim() }, true);
+    } else {
+      return false;
+    }
+  };
   return (
-    <View
-      style={{
-        height: 40,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: colors.lightblue,
-        paddingHorizontal: 14,
-        width: 40,
-        borderRadius: 5,
-        marginLeft: 10,
-        marginBottom: 7,
+    <Send
+      {...props}
+      disabled={false}
+      sendButtonProps={{
+        ...sendButtonProps,
+        onPress: () => customSendPress(onSend, text),
       }}
+      containerStyle={[
+        {
+          justifyContent: "center",
+          marginBottom: 5,
+          marginLeft: 5,
+          opacity: disabled ? 0.5 : 1,
+        },
+        styles.send,
+      ]}
     >
-      {text === "" && (
-        <IconSend color={colors.lightGray} style={{ opacity: 0.5 }} size={25} />
+      {sending ? (
+        <ActivityIndicator size={"small"} color={colors.white} />
+      ) : (
+        <IconSend color={colors.white} size={23} />
       )}
-
-      {text !== "" && (
-        <Send {...props} containerStyle={{ justifyContent: "center" }}>
-          <IconSend color={colors.white} size={25} />
-        </Send>
-      )}
-    </View>
+    </Send>
   );
 };
+
+const styles = StyleSheet.create({
+  send: {
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.lightblue,
+    width: 40,
+    borderRadius: 50,
+  },
+});

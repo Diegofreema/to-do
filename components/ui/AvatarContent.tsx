@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { IconCheck } from "@tabler/icons-react-native";
+import { IconCheck, IconFile } from "@tabler/icons-react-native";
 import { colors } from "@/constants";
 import { AvatarPile } from "@/components/ui/AvatarPile";
 
@@ -13,6 +13,7 @@ export const AvatarContent = ({
   isOnline,
   color = "black",
   chat,
+  hideOnlineStatus = false,
 }: {
   image: string | string[];
   name: string;
@@ -21,7 +22,9 @@ export const AvatarContent = ({
   isOnline?: boolean;
   color?: string;
   chat?: boolean;
+  hideOnlineStatus?: boolean;
 }) => {
+  const isImage = text?.startsWith("https");
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
       {Array.isArray(image) ? (
@@ -48,31 +51,37 @@ export const AvatarContent = ({
           </Text>
           {isOnline && !chat && <View style={styles.online} />}
         </View>
-        <View style={{ flexDirection: "row", gap: 3, alignItems: "center" }}>
-          {chat && (
-            <Text
-              style={{
-                color: "white",
-                fontFamily: "NunitoRegular",
-                fontSize: 12,
-              }}
-            >
-              {isOnline ? "Online" : "Offline"}
-            </Text>
-          )}
-          {isOnline && chat && <View style={styles.online} />}
-        </View>
+        {!hideOnlineStatus && (
+          <View style={{ flexDirection: "row", gap: 3, alignItems: "center" }}>
+            {chat && (
+              <Text
+                style={{
+                  color: "white",
+                  fontFamily: "NunitoRegular",
+                  fontSize: 12,
+                }}
+              >
+                {isOnline ? "Online" : "Offline"}
+              </Text>
+            )}
+            {isOnline && chat && <View style={styles.online} />}
+          </View>
+        )}
         <View style={{ flexDirection: "row", gap: 3, alignItems: "center" }}>
           {myMessage && <IconCheck color={colors.lightblue} size={20} />}
-          <Text
-            style={{
-              color: "black",
-              fontSize: RFPercentage(2),
-              fontFamily: "NunitoRegular",
-            }}
-          >
-            {text}
-          </Text>
+          {isImage ? (
+            <IconFile size={24} color={colors.lightblue} />
+          ) : (
+            <Text
+              style={{
+                color: "black",
+                fontSize: RFPercentage(2),
+                fontFamily: "NunitoRegular",
+              }}
+            >
+              {text}
+            </Text>
+          )}
         </View>
       </View>
     </View>

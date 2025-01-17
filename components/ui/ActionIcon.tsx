@@ -1,4 +1,10 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native";
 import { Icon } from "@tabler/icons-react-native";
 import { Title } from "@/components/typography/Title";
 import { colors } from "@/constants";
@@ -8,13 +14,14 @@ type Props = {
   icon: Icon;
   onPress: () => void;
   text?: string;
+  style?: StyleProp<ViewStyle>;
 };
 
-export const ActionIcon = ({ icon: Icon, onPress, text }: Props) => {
+export const ActionIcon = ({ icon: Icon, onPress, text, style }: Props) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={styles.container}
+      style={[styles.container, style]}
       activeOpacity={0.8}
     >
       <View style={styles.iconContainer}>

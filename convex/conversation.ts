@@ -243,6 +243,9 @@ export const getMessages = query({
     };
   },
 });
+export const getImageUrl = async (ctx: QueryCtx, storageId: Id<"_storage">) => {
+  return await ctx.storage.getUrl(storageId);
+};
 export const getGroupMessages = query({
   args: {
     conversationId: v.optional(v.id("conversations")),
@@ -259,14 +262,23 @@ export const getGroupMessages = query({
     const page = await Promise.all(
       messages.page.map(async (m) => {
         const sender = await getUser(ctx, m.senderId);
+
         if (!sender) {
           throw new Error("Couldn't get user details");
         }
-
-        return {
+        const data = {
           ...m,
+          image: m.image as string | null,
           senderName: sender.name,
         };
+        if (m.image) {
+          const imageUrl = await getImageUrl(ctx, m.image);
+          return {
+            ...data,
+            image: imageUrl,
+          };
+        }
+        return data;
       }),
     );
     return {
@@ -334,15 +346,23 @@ export const createMessages = mutation({
     conversationId: v.id("conversations"),
     content: v.string(),
     parentMessageId: v.optional(v.id("messages")),
+    contentType: v.union(
+      v.literal("image"),
+      v.literal("text"),
+      v.literal("pdf"),
+    ),
+    uploadUrl: v.optional(v.string()),
+    image: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
+    const { uploadUrl, ...rest } = args;
     await ctx.db.insert("messages", {
-      ...args,
-      contentType: "text",
+      ...rest,
       seenId: [args.senderId],
     });
+    const lastMessage = args.contentType === "image" ? uploadUrl : args.content;
     await ctx.db.patch(args.conversationId, {
-      lastMessage: args.content,
+      lastMessage,
       lastMessageTime: Date.now(),
       lastMessageSenderId: args.senderId,
     });

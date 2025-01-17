@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
-import { query, QueryCtx } from "./_generated/server";
+import { mutation, query, QueryCtx } from "./_generated/server";
 
 export const getConversation = query({
   args: {
@@ -46,6 +46,9 @@ export const getConversation = query({
   },
 });
 
+export const generateUploadUrl = mutation(async (ctx) => {
+  return await ctx.storage.generateUploadUrl();
+});
 // helpers
 
 const getUserByMessageSenderId = async (ctx: QueryCtx, userId: Id<"users">) => {

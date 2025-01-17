@@ -11,6 +11,7 @@ type Props = {
     _id: number | Id<"users">;
     name?: string;
   };
+  image?: string;
 };
 
 type MessageType = {
@@ -18,22 +19,26 @@ type MessageType = {
   loggedInUserId: Id<"users">;
   creationTime: number;
   createdBy: string;
+  isCreator: boolean;
 };
 export const useGroupMessages = ({
   results,
   loggedInUserId,
   creationTime,
   createdBy,
+  isCreator,
 }: MessageType) => {
   const [messages, setMessages] = useState<Props[]>([]);
+
   useEffect(() => {
     if (!results) return;
     setMessages([
       ...results?.map((message) => {
         return {
           _id: message?._id,
-          text: message?.content,
+          text: message.content,
           createdAt: new Date(message?._creationTime),
+          image: message.image,
           user: {
             _id: message?.senderId,
             name:
@@ -44,7 +49,7 @@ export const useGroupMessages = ({
       {
         _id: 0,
         system: true,
-        text: `Create by ${createdBy}`,
+        text: `Create by ${isCreator ? "You" : createdBy}`,
         createdAt: new Date(creationTime),
         user: {
           _id: 0,

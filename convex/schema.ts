@@ -34,7 +34,8 @@ export const Message = {
   conversationId: v.id("conversations"),
   isEdited: v.optional(v.boolean()),
   content: v.string(),
-  contentType: v.string(),
+  image: v.optional(v.id("_storage")),
+  contentType: v.union(v.literal("image"), v.literal("text"), v.literal("pdf")),
   seenId: v.array(v.id("users")),
   parentMessageId: v.optional(v.id("messages")),
 };
