@@ -5,11 +5,47 @@ import { useCallback, useState } from "react";
 
 import { CustomPressable } from "@/components/ui/CustomPressable";
 import { PreviewModal } from "@/components/ui/PreviewModal";
+import { ActionSheetOptions } from "@expo/react-native-action-sheet";
+import { Id } from "@/convex/_generated/dataModel";
 
-type Props = MessageImageProps<IMessage> & {};
-export const RenderImage = ({ ...props }: Props) => {
+type Props = MessageImageProps<IMessage> & {
+  showActionSheetWithOptions(
+    options: ActionSheetOptions,
+    callback: (i?: number) => void | Promise<void>,
+  ): void;
+  onDelete: (messageId: Id<"messages">) => void;
+};
+export const RenderImage = ({
+  onDelete,
+  showActionSheetWithOptions,
+  ...props
+}: Props) => {
   const [showPreview, setShowPreview] = useState(false);
   const onClose = useCallback(() => setShowPreview(false), []);
+  const onPress = () => {
+    const options = ["Delete", "Cancel"];
+    const destructiveButtonIndex = 0;
+    const cancelButtonIndex = 1;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+        destructiveButtonIndex,
+      },
+      (selectedIndex?: number) => {
+        console.log(selectedIndex);
+        switch (selectedIndex) {
+          case destructiveButtonIndex:
+            onDelete(props.currentMessage._id as Id<"messages">);
+            break;
+
+          case cancelButtonIndex:
+          // Canceled
+        }
+      },
+    );
+  };
   return (
     <>
       <PreviewModal
@@ -20,6 +56,7 @@ export const RenderImage = ({ ...props }: Props) => {
       />
       <CustomPressable
         onPress={() => setShowPreview(true)}
+        onLongPress={onPress}
         style={styles.imageContainer}
       >
         <Image

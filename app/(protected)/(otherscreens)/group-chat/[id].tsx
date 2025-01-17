@@ -1,4 +1,5 @@
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -12,7 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Audio } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
-import { GiftedChat, SystemMessage } from "react-native-gifted-chat";
+import { GiftedChat, SystemMessage, Time } from "react-native-gifted-chat";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { convexQuery } from "@convex-dev/react-query";
 
@@ -46,10 +47,14 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { RenderImage } from "@/components/RenderImage";
+import * as Clipboard from "expo-clipboard";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 
 const Chat = () => {
   const [text, setText] = useState(" ");
   const [sound, setSound] = useState<Audio.Sound>();
+  const { showActionSheetWithOptions } = useActionSheet();
+  const [messageId, setMessageId] = useState<Id<"messages"> | null>(null);
   const [isAttachImage, setIsAttachImage] = useState(false);
   const [isAttachFile, setIsAttachFile] = useState(false);
   const [imagePaths, setImagePaths] = useState<string[]>([]);
@@ -83,7 +88,10 @@ const Chat = () => {
   const loggedInUserId = useId((state) => state.id!);
   const { fname, lname } = useAuth((state) => state.user);
   const [sending, setSending] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const generateUploadUrl = useMutation(api.chat.generateUploadUrl);
+  const deleteMessage = useMutation(api.message.deleteMessage);
+  const editText = useMutation(api.message.editMessage);
   const { data: conversationData, isPending } = useTanstackQuery(
     convexQuery(api.conversation.getGroupConversation, {
       loggedInUser: loggedInUserId,
@@ -127,6 +135,20 @@ const Chat = () => {
       height.value = 0;
     }
   }, [imagePaths, height]);
+  const onDelete = (messageId: Id<"messages">) => {
+    Alert.alert("This is irreversible", "Delete this message for everyone?", [
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: () => deleteMessage({ messageId }),
+        style: "destructive",
+      },
+    ]);
+  };
   // const onPickDocument = async () => {
   //   const result = await DocumentPicker.getDocumentAsync({
   //     multiple: true,
@@ -220,76 +242,93 @@ const Chat = () => {
       await playSoundOut();
       if (!conversationData?._id || !conversationId) return;
       setSending(true);
-      if (isAttachImage) {
-        await Promise.all(
-          imagePaths.map(async (image) => {
-            const { storageId, uploadUrl } = await uploadProfilePicture(
-              image,
-              generateUploadUrl,
-            );
-            try {
-              await createMessage({
-                image: storageId,
-                senderId: loggedInUserId,
-                recipient: recipients,
-                conversationId,
-                contentType: "image",
-                uploadUrl,
-                content: "",
-              });
-            } catch (e) {
-              console.log(e);
-              onShowToast({
-                description: "Something went wrong, Please try again",
-                type: "error",
-                message: "Failed to send",
-              });
-            } finally {
-              setImagePaths([]);
-              setIsAttachImage(false);
-              setSending(false);
-            }
-          }),
-        );
-
+      if (isEditing) {
+        if (!messageId) return;
         try {
-          await createMessage({
-            content: text.trim(),
-            senderId: loggedInUserId,
-            recipient: recipients,
-            conversationId,
-            contentType: "text",
-          });
+          await editText({ content: text, messageId });
         } catch (e) {
-          console.log(e);
-          onShowToast({
-            type: "error",
-            description: "Failed to send text",
-            message: "Error",
-          });
-        }
-      } else if (isAttachFile) {
-      } else {
-        setMessages((previousMessages) =>
-          GiftedChat.append(previousMessages, messages),
-        );
-        try {
-          await createMessage({
-            content: text.trim(),
-            senderId: loggedInUserId,
-            recipient: recipients,
-            conversationId,
-            contentType: "text",
-          });
-        } catch (e) {
-          console.log(e);
           onShowToast({
             description: "Something went wrong, Please try again",
             type: "error",
-            message: "Failed to send",
+            message: "Failed to edit",
           });
         } finally {
+          setMessageId(null);
+          setIsEditing(false);
           setSending(false);
+        }
+      } else {
+        if (isAttachImage) {
+          await Promise.all(
+            imagePaths.map(async (image) => {
+              const { storageId, uploadUrl } = await uploadProfilePicture(
+                image,
+                generateUploadUrl,
+              );
+              try {
+                await createMessage({
+                  image: storageId,
+                  senderId: loggedInUserId,
+                  recipient: recipients,
+                  conversationId,
+                  contentType: "image",
+                  uploadUrl,
+                  content: "",
+                });
+              } catch (e) {
+                console.log(e);
+                onShowToast({
+                  description: "Something went wrong, Please try again",
+                  type: "error",
+                  message: "Failed to send",
+                });
+              } finally {
+                setImagePaths([]);
+                setIsAttachImage(false);
+                setSending(false);
+              }
+            }),
+          );
+
+          try {
+            await createMessage({
+              content: text.trim(),
+              senderId: loggedInUserId,
+              recipient: recipients,
+              conversationId,
+              contentType: "text",
+            });
+          } catch (e) {
+            console.log(e);
+            onShowToast({
+              type: "error",
+              description: "Failed to send text",
+              message: "Error",
+            });
+          }
+        } else if (isAttachFile) {
+        } else {
+          setMessages((previousMessages) =>
+            GiftedChat.append(previousMessages, messages),
+          );
+          try {
+            await createMessage({
+              content: text.trim(),
+              senderId: loggedInUserId,
+              recipient: recipients,
+              conversationId,
+              contentType: "text",
+            });
+          } catch (e) {
+            console.log(e);
+            onShowToast({
+              description: "Something went wrong, Please try again",
+              type: "error",
+              message: "Failed to send",
+            });
+          } finally {
+            setSending(false);
+          }
         }
       }
     },
@@ -301,6 +340,9 @@ const Chat = () => {
       conversationData?._id,
       isAttachImage,
       imagePaths,
+      messageId,
+      isEditing,
+      editText,
     ],
   );
 
@@ -333,7 +375,28 @@ const Chat = () => {
       }
     }
   };
-
+  const copyToClipboard = async (textToCopy: string) => {
+    const copied = await Clipboard.setStringAsync(textToCopy);
+    if (copied) {
+      onShowToast({
+        message: "Copied to clipboard",
+        type: "success",
+        description: "",
+      });
+    }
+  };
+  const onEdit = async ({
+    textToEdit,
+    messageId,
+  }: {
+    textToEdit: string;
+    messageId: Id<"messages">;
+  }) => {
+    setIsEditing(true);
+    setMessageId(messageId);
+    setText(textToEdit);
+    console.log(messageId);
+  };
   const name = conversationData?.name || "";
   const images = conversationData?.otherUsers?.map((m) => m?.image!) || [];
   const MemoizedChild = useMemo(
@@ -382,13 +445,20 @@ const Chat = () => {
       <View style={{ flex: 1 }}>
         <GiftedChat
           messages={messages}
-          renderMessageImage={(props) => <RenderImage {...props} />}
+          renderMessageImage={(props) => (
+            <RenderImage
+              {...props}
+              showActionSheetWithOptions={showActionSheetWithOptions}
+              onDelete={onDelete}
+            />
+          )}
           loadEarlier={loadEarlier}
           onLoadEarlier={onLoadMore}
           keyboardShouldPersistTaps={"always"}
           placeholder={placeholder}
           onSend={(messages: any) => onSend(messages)}
           onInputTextChanged={setText}
+          text={text}
           user={{
             _id: loggedInUserId,
           }}
@@ -410,12 +480,33 @@ const Chat = () => {
               {user.name}
             </Text>
           )}
-          renderBubble={(props) => <RenderBubble {...props} />}
+          renderBubble={(props) => (
+            <RenderBubble
+              {...props}
+              onCopy={copyToClipboard}
+              showActionSheetWithOptions={showActionSheetWithOptions}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          )}
           renderActions={(props) => (
             <RenderActions
               disable={imagePaths.length > 0}
               {...props}
               onPickDocument={_pickDocument}
+            />
+          )}
+          renderTime={(props) => (
+            <Time
+              {...props}
+              timeTextStyle={{
+                right: {
+                  color: colors.lightblue,
+                },
+                left: {
+                  color: colors.white,
+                },
+              }}
             />
           )}
           renderComposer={(props) => (

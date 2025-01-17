@@ -1,6 +1,7 @@
 import { Toast } from "@/components/ui/toast";
 import { useShowToast } from "@/lib/zustand/useShowToast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { useFonts } from "expo-font";
 import { Slot, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -74,7 +75,9 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <QueryClientProvider client={queryClient}>
             <Toast />
-            <Slot screenOptions={{ headerShown: false }} />
+            <ActionSheetProvider>
+              <Slot screenOptions={{ headerShown: false }} />
+            </ActionSheetProvider>
           </QueryClientProvider>
         </GestureHandlerRootView>
       </ConvexProvider>
