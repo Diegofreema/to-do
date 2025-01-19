@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { IconCheck, IconFile } from "@tabler/icons-react-native";
@@ -26,7 +26,14 @@ export const AvatarContent = ({
 }) => {
   const isImage = text?.startsWith("https");
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        justifyContent: "space-between",
+      }}
+    >
       {Array.isArray(image) ? (
         <AvatarPile avatars={image} />
       ) : (

@@ -12,7 +12,7 @@ import * as ImagePicker from "expo-image-picker";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Audio } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams } from "expo-router";
+import { Redirect, useLocalSearchParams } from "expo-router";
 import { GiftedChat, SystemMessage, Time } from "react-native-gifted-chat";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { convexQuery } from "@convex-dev/react-query";
@@ -49,6 +49,7 @@ import Animated, {
 import { RenderImage } from "@/components/RenderImage";
 import * as Clipboard from "expo-clipboard";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { GroupChatMenu } from "@/components/GroupChatMenu";
 
 const Chat = () => {
   const [text, setText] = useState(" ");
@@ -92,13 +93,15 @@ const Chat = () => {
   const generateUploadUrl = useMutation(api.chat.generateUploadUrl);
   const deleteMessage = useMutation(api.message.deleteMessage);
   const editText = useMutation(api.message.editMessage);
+  const fullName = `${fname} ${lname}`;
+
   const { data: conversationData, isPending } = useTanstackQuery(
     convexQuery(api.conversation.getGroupConversation, {
       loggedInUser: loggedInUserId,
       conversationId: id,
     }),
   );
-  const fullName = `${fname} ${lname}`;
+
   const { results, status, loadMore, isLoading } = usePaginatedQuery(
     api.conversation.getGroupMessages,
     {
@@ -136,6 +139,8 @@ const Chat = () => {
     }
   }, [imagePaths, height]);
   const onDelete = (messageId: Id<"messages">) => {
+    const storageId = results.find((r) => r._id === messageId)?.storageId;
+    console.log("press");
     Alert.alert("This is irreversible", "Delete this message for everyone?", [
       {
         text: "Cancel",
@@ -144,11 +149,12 @@ const Chat = () => {
       },
       {
         text: "Delete",
-        onPress: () => deleteMessage({ messageId }),
+        onPress: () => deleteMessage({ messageId, storage: storageId }),
         style: "destructive",
       },
     ]);
   };
+
   // const onPickDocument = async () => {
   //   const result = await DocumentPicker.getDocumentAsync({
   //     multiple: true,
@@ -395,7 +401,6 @@ const Chat = () => {
     setIsEditing(true);
     setMessageId(messageId);
     setText(textToEdit);
-    console.log(messageId);
   };
   const name = conversationData?.name || "";
   const images = conversationData?.otherUsers?.map((m) => m?.image!) || [];
@@ -419,6 +424,10 @@ const Chat = () => {
       </>
     );
   }
+  const isInGroup = conversationData?.participants.includes(loggedInUserId);
+  if (!isInGroup) {
+    return <Redirect href={"/chat"} />;
+  }
   const loadEarlier = status === "CanLoadMore";
   const disabled =
     (imagePaths.length < 1 && text.trim() === "" && !filePath) || sending;
@@ -439,8 +448,16 @@ const Chat = () => {
         flex: 1,
       }}
     >
-      <View style={{ backgroundColor: colors.lightblue }}>
+      <View
+        style={{
+          backgroundColor: colors.lightblue,
+          justifyContent: "space-between",
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
         <NavHeader color={"white"} avatarContent={MemoizedChild} title="" />
+        <GroupChatMenu conversationId={conversationId!} />
       </View>
       <View style={{ flex: 1 }}>
         <GiftedChat

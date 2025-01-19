@@ -1,5 +1,5 @@
 import { mutation, query, QueryCtx } from "./_generated/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { Id } from "@/convex/_generated/dataModel";
 import { paginationOptsValidator } from "convex/server";
 import { getUser } from "@/convex/user";
@@ -270,12 +270,14 @@ export const getGroupMessages = query({
           ...m,
           image: m.image as string | null,
           senderName: sender.name,
+          storageId: undefined,
         };
         if (m.image) {
           const imageUrl = await getImageUrl(ctx, m.image);
           return {
             ...data,
             image: imageUrl,
+            storageId: m.image,
           };
         }
         return data;
@@ -369,6 +371,23 @@ export const createMessages = mutation({
   },
 });
 
+export const leaveGroup = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    loggedInUserId: v.id("users"),
+  },
+  handler: async (ctx, { conversationId, loggedInUserId }) => {
+    const conversation = await ctx.db.get(conversationId);
+    if (!conversation) {
+      throw new ConvexError("Failed to find group");
+    }
+    await ctx.db.patch(conversation._id, {
+      participants: conversation.participants.filter(
+        (p) => p !== loggedInUserId,
+      ),
+    });
+  },
+});
 // helpers
 const getParticipants = async (ctx: QueryCtx, userId: Id<"users">) => {
   return await ctx.db.get(userId);
