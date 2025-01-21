@@ -140,7 +140,7 @@ const Chat = () => {
   }, [imagePaths, height]);
   const onDelete = (messageId: Id<"messages">) => {
     const storageId = results.find((r) => r._id === messageId)?.storageId;
-    console.log("press");
+
     Alert.alert("This is irreversible", "Delete this message for everyone?", [
       {
         text: "Cancel",
@@ -271,6 +271,7 @@ const Chat = () => {
                 image,
                 generateUploadUrl,
               );
+              console.log({ uploadUrl });
               try {
                 await createMessage({
                   image: storageId,
@@ -279,7 +280,6 @@ const Chat = () => {
                   conversationId,
                   contentType: "image",
                   uploadUrl,
-                  content: "",
                 });
               } catch (e) {
                 console.log(e);
@@ -295,7 +295,7 @@ const Chat = () => {
               }
             }),
           );
-
+          if (text.trim() === "") return;
           try {
             await createMessage({
               content: text.trim(),
@@ -438,7 +438,7 @@ const Chat = () => {
 
   const placeholder =
     isAttachFile || isAttachImage ? "Add a caption..." : "type a message...";
-
+  const loggedInUserIsChief = conversationData?.creatorId === loggedInUserId;
   return (
     <Wrapper
       styles={{
@@ -457,7 +457,10 @@ const Chat = () => {
         }}
       >
         <NavHeader color={"white"} avatarContent={MemoizedChild} title="" />
-        <GroupChatMenu conversationId={conversationId!} />
+        <GroupChatMenu
+          conversationId={conversationId!}
+          loggedInUserIsChief={loggedInUserIsChief}
+        />
       </View>
       <View style={{ flex: 1 }}>
         <GiftedChat

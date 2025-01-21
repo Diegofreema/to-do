@@ -61,6 +61,7 @@ export const RenderBubble = ({
       },
     );
   };
+  // if (props.currentMessage.text === "") return null;
   return (
     <Bubble
       {...props}

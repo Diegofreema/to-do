@@ -66,7 +66,7 @@ const CreateGroup = () => {
     }
     setCreating(true);
     try {
-      await createGroup({
+      const id = await createGroup({
         members: [data?._id, ...members.map((m) => m.id)],
         name: value,
         admin: data?._id,
@@ -78,7 +78,7 @@ const CreateGroup = () => {
         description: "Group has been created",
       });
       clearMembers();
-      router.replace("/");
+      router.replace(`/group-chat/${id}`);
     } catch (e) {
       console.log(e);
       onShowToast({

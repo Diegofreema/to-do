@@ -27,8 +27,12 @@ import { useHandleLeave } from "@/hooks/useHandleLeave";
 const MENU_WIDTH = 150;
 type Props = {
   conversationId: Id<"conversations">;
+  loggedInUserIsChief: boolean;
 };
-export const GroupChatMenu = ({ conversationId }: Props) => {
+export const GroupChatMenu = ({
+  conversationId,
+  loggedInUserIsChief,
+}: Props) => {
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const { onLeaveGroup, leaving } = useHandleLeave({ conversationId });
@@ -127,8 +131,12 @@ export const GroupChatMenu = ({ conversationId }: Props) => {
                 menuAnimatedStyle,
               ]}
             >
-              <MenuItem onPress={onLeave}>Leave group</MenuItem>
-              <View style={styles.divider} />
+              {!loggedInUserIsChief && (
+                <>
+                  <MenuItem onPress={onLeave}>Leave group</MenuItem>
+                  <View style={styles.divider} />
+                </>
+              )}
               <MenuItem onPress={onNavigate}>Group info</MenuItem>
             </Animated.View>
           </Pressable>

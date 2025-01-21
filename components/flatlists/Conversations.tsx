@@ -6,6 +6,7 @@ import { Conversation } from "@/components/ui/Conversation";
 import { Divider } from "@/components/ui/Divider";
 import { EmptyChat } from "@/components/ui/EmptyChat";
 import { colors } from "@/constants";
+import Animated, { SlideInLeft, SlideOutLeft } from "react-native-reanimated";
 
 type Props = PaginateType & {
   conversations: ConversationType[];
@@ -23,15 +24,21 @@ export const Conversations = ({
     }
   };
   return (
-    <FlatList
-      data={conversations}
-      renderItem={({ item }) => <Conversation conversation={item} />}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.contentContainerStyle}
-      ItemSeparatorComponent={() => <Divider />}
-      ListEmptyComponent={() => <EmptyChat />}
-      onEndReached={handleLoadMore}
-    />
+    <Animated.View
+      entering={SlideInLeft.springify().damping(80).stiffness(200)}
+      exiting={SlideOutLeft}
+      style={{ flex: 1 }}
+    >
+      <FlatList
+        data={conversations}
+        renderItem={({ item }) => <Conversation conversation={item} />}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.contentContainerStyle}
+        ItemSeparatorComponent={() => <Divider />}
+        ListEmptyComponent={() => <EmptyChat />}
+        onEndReached={handleLoadMore}
+      />
+    </Animated.View>
   );
 };
 

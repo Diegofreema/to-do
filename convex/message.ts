@@ -44,6 +44,34 @@ export const addToGroup = mutation({
     });
   },
 });
+
+export const makeGroupAdmin = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, { conversationId, userId }) => {
+    const conversation = await ctx.db.get(conversationId);
+    if (!conversation) {
+      throw new ConvexError("Failed to find group");
+    }
+    if (Array.isArray(conversation.adminMembers)) {
+      await ctx.db.patch(conversation._id, {
+        adminMembers: [...conversation.adminMembers, userId],
+      });
+    } else {
+      await ctx.db.patch(conversationId, {
+        adminMembers: [userId],
+      });
+    }
+  },
+});
+export const closeGroup = mutation({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, { conversationId }) => {
+    await ctx.db.delete(conversationId);
+  },
+});
 // query
 
 export const getGroupData = query({

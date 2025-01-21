@@ -83,7 +83,39 @@ export const getGroupConversations = query({
     };
   },
 });
+export const searchGroup = query({
+  args: {
+    search: v.string(),
+    id: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const conversations = await ctx.db
+      .query("conversations")
+      .withSearchIndex("searchName", (q) => q.search("name", args.search))
+      .collect();
+    const conversationThatUserIsIn = conversations.filter((c) =>
+      c.participants.includes(args.id),
+    );
+    const conversationWithUsers = conversationThatUserIsIn.map(async (c) => {
+      const users = c.participants.filter((item) => item !== args.id);
+      const otherUsers = await Promise.all(
+        // Await the array of promises
+        users.map(async (u) => await getUser(ctx, u)),
+      );
 
+      return {
+        id: c._id,
+        lastMessage: c.lastMessage,
+        name: c.name,
+        lastMessageTime: c.lastMessageTime,
+        otherUsers, // Now this will be resolved user data
+        lastMessageSenderId: c.lastMessageSenderId,
+        createdBy: c.createdBy!,
+      };
+    });
+    return await Promise.all(conversationWithUsers);
+  },
+});
 export const getUnreadMessages = query({
   args: {
     conversationId: v.id("conversations"),
@@ -199,9 +231,7 @@ export const getGroupConversation = query({
   handler: async (ctx, { conversationId, loggedInUser }) => {
     const conversation = await ctx.db.get(conversationId);
 
-    if (!conversation) {
-      throw new Error("Conversation not found");
-    }
+    if (!conversation) return null;
 
     if (!conversation.participants) {
       throw new Error("No participants found");
@@ -234,12 +264,27 @@ export const getMessages = query({
       )
       .order("desc")
       .paginate(args.paginationOpts);
-
+    const page = await Promise.all(
+      messages.page.map(async (m) => {
+        const data = {
+          ...m,
+          image: m.image as string | null,
+          storageId: undefined,
+        };
+        if (m.image) {
+          const imageUrl = await getImageUrl(ctx, m.image);
+          return {
+            ...data,
+            image: imageUrl,
+            storageId: m.image,
+          };
+        }
+        return data;
+      }),
+    );
     return {
       ...messages,
-      page: messages.page.map((m) => ({
-        ...m,
-      })),
+      page,
     };
   },
 });
@@ -311,12 +356,13 @@ export const createGroup = mutation({
     createdBy: v.string(),
   },
   handler: async (ctx, { members, name, admin, createdBy }) => {
-    await ctx.db.insert("conversations", {
+    return await ctx.db.insert("conversations", {
       participants: [...members],
       type: "group",
       name: name,
       adminMembers: [admin],
       createdBy,
+      creatorId: admin,
     });
   },
 });
@@ -346,7 +392,7 @@ export const createMessages = mutation({
     senderId: v.id("users"),
     recipient: v.union(v.id("users"), v.array(v.id("users"))),
     conversationId: v.id("conversations"),
-    content: v.string(),
+    content: v.optional(v.string()),
     parentMessageId: v.optional(v.id("messages")),
     contentType: v.union(
       v.literal("image"),
@@ -381,11 +427,15 @@ export const leaveGroup = mutation({
     if (!conversation) {
       throw new ConvexError("Failed to find group");
     }
-    await ctx.db.patch(conversation._id, {
-      participants: conversation.participants.filter(
-        (p) => p !== loggedInUserId,
-      ),
-    });
+    if (conversation.participants.length === 1) {
+      await ctx.db.delete(conversation._id);
+    } else {
+      await ctx.db.patch(conversation._id, {
+        participants: conversation.participants.filter(
+          (p) => p !== loggedInUserId,
+        ),
+      });
+    }
   },
 });
 // helpers

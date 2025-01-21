@@ -21,7 +21,9 @@ export const useHandleLeave = ({
   const [leaving, setLeaving] = useState(false);
   const loggedInUserId = useId((state) => state.id!);
   const leaveGroup = useMutation(api.conversation.leaveGroup);
+
   const idToRemove = remove ? userToRemoveId : loggedInUserId;
+
   const description = remove
     ? "This user won't be able to "
     : "You will no longer ";

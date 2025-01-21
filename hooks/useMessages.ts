@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Doc, Id } from "@/convex/_generated/dataModel";
+import { Id } from "@/convex/_generated/dataModel";
+import { SingleMessageType } from "@/types";
 
 type Props = {
   _id: number | Id<"messages">;
@@ -13,7 +14,7 @@ type Props = {
 };
 
 type MessageType = {
-  results: Doc<"messages">[];
+  results: SingleMessageType[];
   loggedInUserId: Id<"users">;
   creationTime: number;
   otherUserName: string;
@@ -33,6 +34,7 @@ export const useMessages = ({
           _id: message?._id,
           text: message?.content,
           createdAt: new Date(message?._creationTime),
+          image: message.image,
           user: {
             _id: message?.senderId,
             name:

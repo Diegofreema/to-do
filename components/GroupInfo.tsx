@@ -29,6 +29,7 @@ export const GroupInfo = ({
     return <Redirect href={"/chat"} />;
   }
   const images = data?.members.map((m) => m?.image!);
+  console.log(data?.conversation?.creatorId);
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -44,8 +45,9 @@ export const GroupInfo = ({
       </View>
       <GroupMembers
         members={data?.members}
-        adminMembers={data?.conversation?.adminMembers}
+        adminMembers={data?.conversation?.adminMembers!}
         conversationId={conversationId}
+        creatorId={data?.conversation?.creatorId!}
       />
     </View>
   );

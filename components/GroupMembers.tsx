@@ -13,16 +13,20 @@ type Props = {
   members: Doc<"users">[];
   adminMembers: Id<"users">[];
   conversationId: Id<"conversations">;
+  creatorId: Id<"users">;
 };
 
 export const GroupMembers = ({
   members,
   adminMembers,
   conversationId,
+  creatorId,
 }: Props) => {
   const { bottom } = useSafeAreaInsets();
   const id = useId((state) => state.id!);
   const isAdmin = adminMembers.includes(id);
+
+  console.log({ creatorId });
   const onAction = () => {
     router.push(`/add-member?conversationId=${conversationId}`);
   };
@@ -44,10 +48,16 @@ export const GroupMembers = ({
           member={item}
           adminMembers={adminMembers}
           conversationId={conversationId}
+          creatorId={creatorId}
         />
       )}
       contentContainerStyle={{ gap: 20, flexGrow: 1 }}
-      ListFooterComponent={<LeaveGroup conversationId={conversationId} />}
+      ListFooterComponent={
+        <LeaveGroup
+          conversationId={conversationId}
+          isCreator={creatorId === id}
+        />
+      }
       ListFooterComponentStyle={{ marginTop: "auto", marginBottom: bottom }}
     />
   );

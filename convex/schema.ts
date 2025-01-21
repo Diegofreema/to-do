@@ -26,6 +26,7 @@ export const Conversation = {
   lastMessageSenderId: v.optional(v.id("users")),
   adminMembers: v.optional(v.array(v.id("users"))),
   createdBy: v.optional(v.string()),
+  creatorId: v.optional(v.id("users")),
 };
 
 export const Message = {
@@ -33,7 +34,7 @@ export const Message = {
   recipient: v.union(v.id("users"), v.array(v.id("users"))),
   conversationId: v.id("conversations"),
   isEdited: v.optional(v.boolean()),
-  content: v.string(),
+  content: v.optional(v.string()),
   image: v.optional(v.id("_storage")),
   contentType: v.union(v.literal("image"), v.literal("text"), v.literal("pdf")),
   seenId: v.array(v.id("users")),
@@ -48,7 +49,11 @@ export default defineSchema({
     .searchIndex("searchName", {
       searchField: "name",
     }),
-  conversations: defineTable(Conversation).index("type", ["type"]),
+  conversations: defineTable(Conversation)
+    .index("type", ["type"])
+    .searchIndex("searchName", {
+      searchField: "name",
+    }),
   messages: defineTable(Message)
     .index("by_conversationId", ["conversationId"])
     .index("by_conversationId_recipient", ["conversationId", "recipient"]),

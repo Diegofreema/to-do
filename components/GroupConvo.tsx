@@ -50,7 +50,7 @@ export const GroupConversation = ({ conversation }: GroupConvoProps) => {
           <AvatarContent
             name={name || ""}
             image={[...otherUsers?.map((u) => u?.image!)]}
-            text={trimText(text, 15)}
+            text={trimText(text, 20)}
             myMessage={isMine}
           />
           <View style={{ marginTop: 10 }}>

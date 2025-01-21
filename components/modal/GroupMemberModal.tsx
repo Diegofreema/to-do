@@ -12,6 +12,11 @@ type GroupMemberModalProps = {
   id: Id<"users">;
   name: string;
   onRemove: () => void;
+  isAdmin: boolean;
+  onAsk: (id: Id<"users">) => void;
+  isCreator: boolean;
+  loggedInUserIsCreator: boolean;
+  isAdminButNotCreator: boolean;
 };
 
 export const GroupMemberModal = ({
@@ -20,6 +25,11 @@ export const GroupMemberModal = ({
   name,
   id,
   onRemove,
+  isAdmin,
+  onAsk,
+  loggedInUserIsCreator,
+
+  isAdminButNotCreator,
 }: GroupMemberModalProps) => {
   const onMessage = () => {
     onClose();
@@ -28,6 +38,10 @@ export const GroupMemberModal = ({
   const onLeave = async () => {
     onClose();
     onRemove();
+  };
+  const onMakeAdmin = () => {
+    onAsk(id);
+    onClose();
   };
   return (
     <Modal
@@ -43,15 +57,24 @@ export const GroupMemberModal = ({
             onPress={onClose}
             style={{ position: "absolute", right: 5, zIndex: 3, top: 0 }}
           />
-          <CustomPressable>
-            <Text style={styles.text}>Make group admin</Text>
-          </CustomPressable>
+          {isAdmin && (
+            <CustomPressable onPress={onMakeAdmin}>
+              <Text style={styles.text}>Make group admin</Text>
+            </CustomPressable>
+          )}
           <CustomPressable onPress={onMessage}>
             <Text style={styles.text}>Message {name}</Text>
           </CustomPressable>
-          <CustomPressable onPress={onLeave}>
-            <Text style={styles.text}>Remove {name}</Text>
-          </CustomPressable>
+          {loggedInUserIsCreator && isAdminButNotCreator && (
+            <CustomPressable onPress={onLeave}>
+              <Text style={styles.text}>Dismiss as admin</Text>
+            </CustomPressable>
+          )}
+          {isAdmin && (
+            <CustomPressable onPress={onLeave}>
+              <Text style={styles.text}>Remove {name}</Text>
+            </CustomPressable>
+          )}
         </View>
       </View>
     </Modal>
