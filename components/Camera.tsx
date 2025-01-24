@@ -50,7 +50,7 @@ export const CameraComponent = () => {
     setMode((prev) => (prev === 'back' ? 'front' : 'back'));
   };
   const acceptImage = () => {
-    router.replace(path as Href);
+    router.back();
   };
   return imageUrl ? (
     <PreviewImage

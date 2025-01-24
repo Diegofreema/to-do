@@ -1,3 +1,14 @@
+import { convexQuery } from '@convex-dev/react-query';
+import { useQuery as useTanstackQuery } from '@tanstack/react-query';
+import { Audio } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
+import {
+  Redirect,
+  router,
+  useLocalSearchParams,
+  usePathname,
+} from 'expo-router';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -7,55 +18,43 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import * as AllDocumentPicker from 'react-native-document-picker';
-import * as ImagePicker from 'expo-image-picker';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Audio } from 'expo-av';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Redirect,
-  router,
-  useLocalSearchParams,
-  usePathname,
-} from 'expo-router';
 import { GiftedChat, SystemMessage, Time } from 'react-native-gifted-chat';
-import { useQuery as useTanstackQuery } from '@tanstack/react-query';
-import { convexQuery } from '@convex-dev/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Id } from '@/convex/_generated/dataModel';
-import { useId } from '@/lib/zustand/useId';
-import { api } from '@/convex/_generated/api';
-import { useMutation, usePaginatedQuery } from 'convex/react';
-import { useMarkRead } from '@/hooks/useMarkRead';
-import { AvatarContent } from '@/components/ui/AvatarContent';
-import { Spacer } from '@/components/ui/Divider';
-import { colors } from '@/constants';
-import { Wrapper } from '@/components/ui/Wrapper';
-import { NavHeader } from '@/components/ui/NavHeader';
 import Colors from '@/Colors';
-import { RenderActions } from '@/components/RenderAction';
-import { RenderComposer } from '@/components/RenderComposer';
-import { RenderSend } from '@/components/RenderSend';
-import { useGroupMessages } from '@/hooks/useGroupMessage';
-import { ChatLoadingUi } from '@/components/ui/ChatLoadingUi';
-import { useAuth } from '@/lib/zustand/useAuth';
-import { uploadProfilePicture } from '@/helper';
-import { useShowToast } from '@/lib/zustand/useShowToast';
-import { IconChevronDown } from '@tabler/icons-react-native';
-import { Image } from 'expo-image';
+import { GroupChatMenu } from '@/components/GroupChatMenu';
 import { InChatFileTransfer } from '@/components/InChatFileTransfer';
+import { RenderActions } from '@/components/RenderAction';
 import { RenderBubble } from '@/components/RenderBubble';
+import { RenderComposer } from '@/components/RenderComposer';
+import { RenderImage } from '@/components/RenderImage';
+import { RenderSend } from '@/components/RenderSend';
+import { AvatarContent } from '@/components/ui/AvatarContent';
+import { ChatLoadingUi } from '@/components/ui/ChatLoadingUi';
+import { Spacer } from '@/components/ui/Divider';
+import { NavHeader } from '@/components/ui/NavHeader';
+import { Wrapper } from '@/components/ui/Wrapper';
+import { colors } from '@/constants';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
+import { uploadProfilePicture } from '@/helper';
+import { useGroupMessages } from '@/hooks/useGroupMessage';
+import { useMarkRead } from '@/hooks/useMarkRead';
+import { useAuth } from '@/lib/zustand/useAuth';
+import { useGetImage } from '@/lib/zustand/useGetImage';
+import { useId } from '@/lib/zustand/useId';
+import { useShowToast } from '@/lib/zustand/useShowToast';
+import { useActionSheet } from '@expo/react-native-action-sheet';
+import { IconChevronDown } from '@tabler/icons-react-native';
+import { useMutation, usePaginatedQuery } from 'convex/react';
+import * as Clipboard from 'expo-clipboard';
+import { Image } from 'expo-image';
 import { ScrollView } from 'moti';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { RenderImage } from '@/components/RenderImage';
-import * as Clipboard from 'expo-clipboard';
-import { useActionSheet } from '@expo/react-native-action-sheet';
-import { GroupChatMenu } from '@/components/GroupChatMenu';
-import { useGetImage } from '@/lib/zustand/useGetImage';
 
 const Chat = () => {
   const [text, setText] = useState(' ');
@@ -63,7 +62,7 @@ const Chat = () => {
   const { showActionSheetWithOptions } = useActionSheet();
   const [messageId, setMessageId] = useState<Id<'messages'> | null>(null);
   const [isAttachImage, setIsAttachImage] = useState(false);
-  const [isAttachFile, setIsAttachFile] = useState(false);
+  // const [isAttachFile, setIsAttachFile] = useState(false);
   const [imagePaths, setImagePaths] = useState<string[]>([]);
   const [filePath, setFilePath] = useState('');
   const height = useSharedValue(0);
@@ -256,15 +255,11 @@ const Chat = () => {
   const pathname = usePathname();
   const onOpenCamera = () => {
     router.push(`/camera?path=${pathname}`);
+    setHasTriedSending(false);
   };
   const onSendImage = useCallback(async () => {
     if (!img) return;
     if (!conversationId) {
-      onShowToast({
-        description: 'Conversation not initialized',
-        type: 'error',
-        message: 'Failed to send',
-      });
       return;
     }
 
@@ -317,6 +312,11 @@ const Chat = () => {
       onSendImage();
       setHasTriedSending(true);
     }
+    return () => {
+      if (hasTriedSending) {
+        setHasTriedSending(false);
+      }
+    };
   }, [hasTriedSending, onSendImage]);
   const onSend = useCallback(
     async (messages = []) => {
@@ -389,7 +389,6 @@ const Chat = () => {
               message: 'Error',
             });
           }
-        } else if (isAttachFile) {
         } else {
           setMessages((previousMessages) =>
             GiftedChat.append(previousMessages, messages)
@@ -424,7 +423,7 @@ const Chat = () => {
       text,
       onShowToast,
       isAttachImage,
-      isAttachFile,
+
       imagePaths,
       generateUploadUrl,
       createMessage,
@@ -492,8 +491,7 @@ const Chat = () => {
     loadMore(20);
   };
 
-  const placeholder =
-    isAttachFile || isAttachImage ? 'Add a caption...' : 'type a message...';
+  const placeholder = isAttachImage ? 'Add a caption...' : 'type a message...';
   const loggedInUserIsChief = conversationData?.creatorId === loggedInUserId;
   return (
     <Wrapper
@@ -593,7 +591,7 @@ const Chat = () => {
           renderSend={(props) => (
             <RenderSend
               disabled={disabled}
-              image={isAttachImage || isAttachFile}
+              image={isAttachImage}
               {...props}
               sending={sending}
             />

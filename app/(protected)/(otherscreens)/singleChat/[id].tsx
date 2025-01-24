@@ -65,7 +65,7 @@ const Chat = () => {
   const [isAttachImage, setIsAttachImage] = useState(false);
   const [isAttachFile, setIsAttachFile] = useState(false);
   const [imagePaths, setImagePaths] = useState<string[]>([]);
-  const [filePath, setFilePath] = useState<string[]>([]);
+
   const { showActionSheetWithOptions } = useActionSheet();
   const [sending, setSending] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -75,6 +75,7 @@ const Chat = () => {
   const pathname = usePathname();
   const onOpenCamera = () => {
     router.push(`/camera?path=${pathname}`);
+    setHasTriedSending(false);
   };
   const insets = useSafeAreaInsets();
 
@@ -130,22 +131,18 @@ const Chat = () => {
   });
   const conversationId = conversationData?.conversation?._id;
   useEffect(() => {
-    if (imagePaths.length || filePath.length) {
+    if (imagePaths.length) {
       height.value = 90;
     } else {
       height.value = 0;
     }
-  }, [imagePaths, height, filePath]);
+  }, [imagePaths, height]);
   // Early return if no image
+  console.log({ conversationId, hasTriedSending });
 
   const onSendImage = useCallback(async () => {
     if (!img) return;
     if (!conversationId) {
-      onShowToast({
-        description: 'Conversation not initialized',
-        type: 'error',
-        message: 'Failed to send',
-      });
       return;
     }
 
@@ -193,11 +190,18 @@ const Chat = () => {
     recipient,
     removeImage,
   ]);
+  console.log({ img });
+
   useEffect(() => {
     if (!hasTriedSending) {
       onSendImage();
       setHasTriedSending(true);
     }
+    return () => {
+      if (hasTriedSending) {
+        setHasTriedSending(false);
+      }
+    };
   }, [hasTriedSending, onSendImage]); // Reduced dependency array to essential items
 
   const onSend = useCallback(
@@ -251,55 +255,6 @@ const Chat = () => {
               }
             })
           );
-        } else if (isAttachFile) {
-          await Promise.all(
-            filePath.map(async (file) => {
-              const { storageId, uploadUrl } = await uploadDoc(
-                file,
-                generateUploadUrl
-              );
-              console.log({ uploadUrl, storageId });
-
-              try {
-                await createMessage({
-                  pdf: storageId,
-                  senderId: loggedInUserId,
-                  recipient: recipient,
-                  conversationId,
-                  contentType: 'pdf',
-                  uploadUrl,
-                });
-              } catch (e) {
-                console.log(e);
-                onShowToast({
-                  description: 'Something went wrong, Please try again',
-                  type: 'error',
-                  message: 'Failed to send',
-                });
-              } finally {
-                setIsAttachFile(false);
-                setFilePath([]);
-                setSending(false);
-              }
-            })
-          );
-          if (text.trim() === '') return;
-          try {
-            await createMessage({
-              content: text.trim(),
-              senderId: loggedInUserId,
-              recipient: recipient,
-              conversationId,
-              contentType: 'text',
-            });
-          } catch (e) {
-            console.log(e);
-            onShowToast({
-              type: 'error',
-              description: 'Failed to send text',
-              message: 'Error',
-            });
-          }
         } else {
           setMessages((previousMessages) =>
             GiftedChat.append(previousMessages, messages)
@@ -332,12 +287,12 @@ const Chat = () => {
       conversationData,
       conversationId,
       isAttachImage,
-      isAttachFile,
+
       imagePaths,
       messageId,
       isEditing,
       editText,
-      filePath,
+
       generateUploadUrl,
       onShowToast,
       recipient,
@@ -371,8 +326,7 @@ const Chat = () => {
   //   }
   // };
 
-  const disabled =
-    (imagePaths.length < 1 && text.trim() === '' && !filePath) || sending;
+  const disabled = (imagePaths.length < 1 && text.trim() === '') || sending;
   const onDelete = (messageId: Id<'messages'>) => {
     const storageId = results.find((r) => r._id === messageId)?.storageId;
     Alert.alert('This is irreversible', 'Delete this message for everyone?', [
@@ -452,30 +406,10 @@ const Chat = () => {
                 </TouchableOpacity>
               </View>
             ))}
-          {filePath.length > 0 && (
-            <View style={styles.chatFooter}>
-              {filePath.map((f, i) => (
-                <View key={i}>
-                  <InChatFileTransfer filePath={f} />
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (filePath.length === 1) {
-                        setIsAttachImage(false);
-                      }
-                      setFilePath(filePath.filter((_, index) => i !== index));
-                    }}
-                    style={styles.buttonFooterChat}
-                  >
-                    <Text style={styles.textFooterChat}>X</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          )}
         </ScrollView>
       </Animated.View>
     );
-  }, [filePath, imagePaths, animatedStyle]);
+  }, [imagePaths, animatedStyle]);
   const MemoizedChild = useMemo(
     () => (
       <AvatarContent
