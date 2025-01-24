@@ -38,9 +38,12 @@ export const getConversations = query({
           };
         }),
     );
+    const sortedPages = page.sort(
+      (a, b) => b?.lastMessageTime! - a?.lastMessageTime!,
+    );
     return {
       ...conversations,
-      page,
+      page: sortedPages,
     };
   },
 });
@@ -77,9 +80,12 @@ export const getGroupConversations = query({
           };
         }),
     );
+    const sortedPages = page.sort(
+      (a, b) => b?.lastMessageTime! - a?.lastMessageTime!,
+    );
     return {
       ...conversations,
-      page,
+      page: sortedPages,
     };
   },
 });
@@ -279,6 +285,14 @@ export const getMessages = query({
             storageId: m.image,
           };
         }
+        if (m.pdf) {
+          const pdf = await getImageUrl(ctx, m.pdf);
+          return {
+            ...data,
+            pdf,
+            storageId: m.pdf,
+          };
+        }
         return data;
       }),
     );
@@ -401,6 +415,7 @@ export const createMessages = mutation({
     ),
     uploadUrl: v.optional(v.string()),
     image: v.optional(v.id("_storage")),
+    pdf: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const { uploadUrl, ...rest } = args;
@@ -408,7 +423,10 @@ export const createMessages = mutation({
       ...rest,
       seenId: [args.senderId],
     });
-    const lastMessage = args.contentType === "image" ? uploadUrl : args.content;
+    const lastMessage =
+      args.contentType === "image" || args.contentType === "pdf"
+        ? uploadUrl
+        : args.content;
     await ctx.db.patch(args.conversationId, {
       lastMessage,
       lastMessageTime: Date.now(),

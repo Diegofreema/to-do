@@ -1,7 +1,21 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
+import { trimText } from "@/helper";
 
-export const InChatFileTransfer = ({ filePath }: { filePath: string }) => {
+export const InChatFileTransfer = ({
+  filePath,
+  style,
+}: {
+  filePath: string;
+  style?: StyleProp<ViewStyle>;
+}) => {
   let fileType = "";
   let name = "";
   if (filePath !== undefined) {
@@ -9,37 +23,30 @@ export const InChatFileTransfer = ({ filePath }: { filePath: string }) => {
     fileType = filePath.split(".").pop() as string;
   }
   return (
-    <View style={styles.container}>
-      <View style={styles.frame}>
+    <View style={[styles.frame, style]}>
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
         <Image
           source={
             fileType === "pdf"
               ? require("../assets/chat_file.png")
               : require("../assets/unknowFile.png")
           }
-          style={{ height: 60, width: 60 }}
+          style={{ height: 50, width: 50 }}
         />
-        <View>
-          <Text style={styles.text}>
-            {name.replace("%20", "").replace(" ", "")}
-          </Text>
-          <Text style={styles.textType}>{fileType.toUpperCase()}</Text>
-        </View>
+      </View>
+      <View>
+        <Text style={styles.text}>
+          {trimText(name.replace(/%20/g, " ").replace(" ", ""), 15)}
+        </Text>
+        {/*<Text style={styles.textType}>{fileType.toUpperCase()}</Text>*/}
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 5,
-    borderRadius: 15,
-    padding: 5,
-  },
   text: {
     color: "black",
-    marginTop: 10,
     fontSize: 16,
     lineHeight: 20,
     marginLeft: 5,
@@ -56,7 +63,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flexDirection: "row",
     borderRadius: 10,
-    padding: 5,
-    marginTop: -4,
+    gap: 5,
+    width: 200,
+    height: "100%",
+    alignItems: "center",
   },
 });

@@ -7,6 +7,8 @@ type Props = {
   system?: boolean;
   text: string;
   createdAt: Date;
+  image?: string;
+  audio?: string;
   user: {
     _id: number | Id<"users">;
     name?: string;
@@ -35,6 +37,7 @@ export const useMessages = ({
           text: message?.content,
           createdAt: new Date(message?._creationTime),
           image: message.image,
+          audio: message.pdf,
           user: {
             _id: message?.senderId,
             name:

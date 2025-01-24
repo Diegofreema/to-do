@@ -6,60 +6,66 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import * as AllDocumentPicker from "react-native-document-picker";
-import * as ImagePicker from "expo-image-picker";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Audio } from "expo-av";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Redirect, useLocalSearchParams } from "expo-router";
-import { GiftedChat, SystemMessage, Time } from "react-native-gifted-chat";
-import { useQuery as useTanstackQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
+} from 'react-native';
+import * as AllDocumentPicker from 'react-native-document-picker';
+import * as ImagePicker from 'expo-image-picker';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Audio } from 'expo-av';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Redirect,
+  router,
+  useLocalSearchParams,
+  usePathname,
+} from 'expo-router';
+import { GiftedChat, SystemMessage, Time } from 'react-native-gifted-chat';
+import { useQuery as useTanstackQuery } from '@tanstack/react-query';
+import { convexQuery } from '@convex-dev/react-query';
 
-import { Id } from "@/convex/_generated/dataModel";
-import { useId } from "@/lib/zustand/useId";
-import { api } from "@/convex/_generated/api";
-import { useMutation, usePaginatedQuery } from "convex/react";
-import { useMarkRead } from "@/hooks/useMarkRead";
-import { AvatarContent } from "@/components/ui/AvatarContent";
-import { Spacer } from "@/components/ui/Divider";
-import { colors } from "@/constants";
-import { Wrapper } from "@/components/ui/Wrapper";
-import { NavHeader } from "@/components/ui/NavHeader";
-import Colors from "@/Colors";
-import { RenderActions } from "@/components/RenderAction";
-import { RenderComposer } from "@/components/RenderComposer";
-import { RenderSend } from "@/components/RenderSend";
-import { useGroupMessages } from "@/hooks/useGroupMessage";
-import { ChatLoadingUi } from "@/components/ui/ChatLoadingUi";
-import { useAuth } from "@/lib/zustand/useAuth";
-import { uploadProfilePicture } from "@/helper";
-import { useShowToast } from "@/lib/zustand/useShowToast";
-import { IconChevronDown } from "@tabler/icons-react-native";
-import { Image } from "expo-image";
-import { InChatFileTransfer } from "@/components/InChatFileTransfer";
-import { RenderBubble } from "@/components/RenderBubble";
-import { ScrollView } from "moti";
+import { Id } from '@/convex/_generated/dataModel';
+import { useId } from '@/lib/zustand/useId';
+import { api } from '@/convex/_generated/api';
+import { useMutation, usePaginatedQuery } from 'convex/react';
+import { useMarkRead } from '@/hooks/useMarkRead';
+import { AvatarContent } from '@/components/ui/AvatarContent';
+import { Spacer } from '@/components/ui/Divider';
+import { colors } from '@/constants';
+import { Wrapper } from '@/components/ui/Wrapper';
+import { NavHeader } from '@/components/ui/NavHeader';
+import Colors from '@/Colors';
+import { RenderActions } from '@/components/RenderAction';
+import { RenderComposer } from '@/components/RenderComposer';
+import { RenderSend } from '@/components/RenderSend';
+import { useGroupMessages } from '@/hooks/useGroupMessage';
+import { ChatLoadingUi } from '@/components/ui/ChatLoadingUi';
+import { useAuth } from '@/lib/zustand/useAuth';
+import { uploadProfilePicture } from '@/helper';
+import { useShowToast } from '@/lib/zustand/useShowToast';
+import { IconChevronDown } from '@tabler/icons-react-native';
+import { Image } from 'expo-image';
+import { InChatFileTransfer } from '@/components/InChatFileTransfer';
+import { RenderBubble } from '@/components/RenderBubble';
+import { ScrollView } from 'moti';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-} from "react-native-reanimated";
-import { RenderImage } from "@/components/RenderImage";
-import * as Clipboard from "expo-clipboard";
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import { GroupChatMenu } from "@/components/GroupChatMenu";
+} from 'react-native-reanimated';
+import { RenderImage } from '@/components/RenderImage';
+import * as Clipboard from 'expo-clipboard';
+import { useActionSheet } from '@expo/react-native-action-sheet';
+import { GroupChatMenu } from '@/components/GroupChatMenu';
+import { useGetImage } from '@/lib/zustand/useGetImage';
 
 const Chat = () => {
-  const [text, setText] = useState(" ");
+  const [text, setText] = useState(' ');
   const [sound, setSound] = useState<Audio.Sound>();
   const { showActionSheetWithOptions } = useActionSheet();
-  const [messageId, setMessageId] = useState<Id<"messages"> | null>(null);
+  const [messageId, setMessageId] = useState<Id<'messages'> | null>(null);
   const [isAttachImage, setIsAttachImage] = useState(false);
   const [isAttachFile, setIsAttachFile] = useState(false);
   const [imagePaths, setImagePaths] = useState<string[]>([]);
-  const [filePath, setFilePath] = useState("");
+  const [filePath, setFilePath] = useState('');
   const height = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => ({
     height: withSpring(height.value, {
@@ -68,9 +74,9 @@ const Chat = () => {
     }),
   }));
   async function playSoundOut() {
-    console.log("Loading Sound");
+    console.log('Loading Sound');
     const { sound } = await Audio.Sound.createAsync(
-      require("@/assets/out.wav"),
+      require('@/assets/out.wav')
     );
     setSound(sound);
 
@@ -85,11 +91,14 @@ const Chat = () => {
   }, [sound]);
 
   const insets = useSafeAreaInsets();
-  const { id } = useLocalSearchParams<{ id: Id<"conversations"> }>();
+  const { id } = useLocalSearchParams<{ id: Id<'conversations'> }>();
   const loggedInUserId = useId((state) => state.id!);
   const { fname, lname } = useAuth((state) => state.user);
   const [sending, setSending] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const img = useGetImage((state) => state.image);
+  const removeImage = useGetImage((state) => state.removeImage);
+  const [hasTriedSending, setHasTriedSending] = useState(false);
   const generateUploadUrl = useMutation(api.chat.generateUploadUrl);
   const deleteMessage = useMutation(api.message.deleteMessage);
   const editText = useMutation(api.message.editMessage);
@@ -99,7 +108,7 @@ const Chat = () => {
     convexQuery(api.conversation.getGroupConversation, {
       loggedInUser: loggedInUserId,
       conversationId: id,
-    }),
+    })
   );
 
   const { results, status, loadMore, isLoading } = usePaginatedQuery(
@@ -107,7 +116,7 @@ const Chat = () => {
     {
       conversationId: id,
     },
-    { initialNumItems: 50 },
+    { initialNumItems: 50 }
   );
   const isCreator =
     fullName.toLowerCase() === conversationData?.createdBy?.toLowerCase();
@@ -128,8 +137,10 @@ const Chat = () => {
     loggedInUserId,
   });
   const conversationId = conversationData?._id;
-  const recipients: Id<"users">[] =
-    conversationData?.otherUsers.map((m) => m?._id!) || [];
+  const recipients: Id<'users'>[] = useMemo(
+    () => conversationData?.otherUsers.map((m) => m?._id!) || [],
+    [conversationData?.otherUsers]
+  );
   const createMessage = useMutation(api.conversation.createMessages);
   useEffect(() => {
     if (imagePaths.length) {
@@ -138,19 +149,19 @@ const Chat = () => {
       height.value = 0;
     }
   }, [imagePaths, height]);
-  const onDelete = (messageId: Id<"messages">) => {
+  const onDelete = (messageId: Id<'messages'>) => {
     const storageId = results.find((r) => r._id === messageId)?.storageId;
 
-    Alert.alert("This is irreversible", "Delete this message for everyone?", [
+    Alert.alert('This is irreversible', 'Delete this message for everyone?', [
       {
-        text: "Cancel",
-        onPress: () => console.log("Cancel Pressed"),
-        style: "cancel",
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
       },
       {
-        text: "Delete",
+        text: 'Delete',
         onPress: () => deleteMessage({ messageId, storage: storageId }),
-        style: "destructive",
+        style: 'destructive',
       },
     ]);
   };
@@ -231,7 +242,7 @@ const Chat = () => {
             <View style={styles.chatFooter}>
               <InChatFileTransfer filePath={filePath} />
               <TouchableOpacity
-                onPress={() => setFilePath("")}
+                onPress={() => setFilePath('')}
                 style={styles.buttonFooterChat}
               >
                 <Text style={styles.textFooterChat}>X</Text>
@@ -241,8 +252,72 @@ const Chat = () => {
         </ScrollView>
       </Animated.View>
     );
-  }, [filePath, imagePaths]);
+  }, [animatedStyle, filePath, imagePaths]);
+  const pathname = usePathname();
+  const onOpenCamera = () => {
+    router.push(`/camera?path=${pathname}`);
+  };
+  const onSendImage = useCallback(async () => {
+    if (!img) return;
+    if (!conversationId) {
+      onShowToast({
+        description: 'Conversation not initialized',
+        type: 'error',
+        message: 'Failed to send',
+      });
+      return;
+    }
 
+    setSending(true);
+    try {
+      const { storageId, uploadUrl } = await uploadProfilePicture(
+        img,
+        generateUploadUrl
+      );
+
+      if (!storageId || !uploadUrl) {
+        throw new Error('Failed to upload image');
+      }
+
+      await createMessage({
+        image: storageId,
+        senderId: loggedInUserId,
+        recipient: recipients,
+        conversationId,
+        contentType: 'image',
+        uploadUrl,
+      });
+
+      removeImage();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Image send error:', errorMessage);
+
+      onShowToast({
+        description: 'Failed to send image. Please try again',
+        type: 'error',
+        message: 'Send Failed',
+      });
+    } finally {
+      setSending(false);
+    }
+  }, [
+    conversationId,
+    createMessage,
+    generateUploadUrl,
+    img,
+    loggedInUserId,
+    onShowToast,
+    recipients,
+    removeImage,
+  ]);
+  useEffect(() => {
+    if (!hasTriedSending) {
+      onSendImage();
+      setHasTriedSending(true);
+    }
+  }, [hasTriedSending, onSendImage]);
   const onSend = useCallback(
     async (messages = []) => {
       await playSoundOut();
@@ -253,10 +328,12 @@ const Chat = () => {
         try {
           await editText({ content: text, messageId });
         } catch (e) {
+          console.log(e);
+
           onShowToast({
-            description: "Something went wrong, Please try again",
-            type: "error",
-            message: "Failed to edit",
+            description: 'Something went wrong, Please try again',
+            type: 'error',
+            message: 'Failed to edit',
           });
         } finally {
           setMessageId(null);
@@ -269,7 +346,7 @@ const Chat = () => {
             imagePaths.map(async (image) => {
               const { storageId, uploadUrl } = await uploadProfilePicture(
                 image,
-                generateUploadUrl,
+                generateUploadUrl
               );
               console.log({ uploadUrl });
               try {
@@ -278,44 +355,44 @@ const Chat = () => {
                   senderId: loggedInUserId,
                   recipient: recipients,
                   conversationId,
-                  contentType: "image",
+                  contentType: 'image',
                   uploadUrl,
                 });
               } catch (e) {
                 console.log(e);
                 onShowToast({
-                  description: "Something went wrong, Please try again",
-                  type: "error",
-                  message: "Failed to send",
+                  description: 'Something went wrong, Please try again',
+                  type: 'error',
+                  message: 'Failed to send',
                 });
               } finally {
                 setImagePaths([]);
                 setIsAttachImage(false);
                 setSending(false);
               }
-            }),
+            })
           );
-          if (text.trim() === "") return;
+          if (text.trim() === '') return;
           try {
             await createMessage({
               content: text.trim(),
               senderId: loggedInUserId,
               recipient: recipients,
               conversationId,
-              contentType: "text",
+              contentType: 'text',
             });
           } catch (e) {
             console.log(e);
             onShowToast({
-              type: "error",
-              description: "Failed to send text",
-              message: "Error",
+              type: 'error',
+              description: 'Failed to send text',
+              message: 'Error',
             });
           }
         } else if (isAttachFile) {
         } else {
           setMessages((previousMessages) =>
-            GiftedChat.append(previousMessages, messages),
+            GiftedChat.append(previousMessages, messages)
           );
           try {
             await createMessage({
@@ -323,14 +400,14 @@ const Chat = () => {
               senderId: loggedInUserId,
               recipient: recipients,
               conversationId,
-              contentType: "text",
+              contentType: 'text',
             });
           } catch (e) {
             console.log(e);
             onShowToast({
-              description: "Something went wrong, Please try again",
-              type: "error",
-              message: "Failed to send",
+              description: 'Something went wrong, Please try again',
+              type: 'error',
+              message: 'Failed to send',
             });
           } finally {
             setSending(false);
@@ -339,55 +416,31 @@ const Chat = () => {
       }
     },
     [
+      conversationData?._id,
+      conversationId,
+      isEditing,
+      messageId,
+      editText,
+      text,
+      onShowToast,
+      isAttachImage,
+      isAttachFile,
+      imagePaths,
+      generateUploadUrl,
       createMessage,
       loggedInUserId,
-      text,
-      conversationData,
-      conversationData?._id,
-      isAttachImage,
-      imagePaths,
-      messageId,
-      isEditing,
-      editText,
-    ],
+      recipients,
+      setMessages,
+    ]
   );
 
-  const _pickDocument = async () => {
-    try {
-      const result = await AllDocumentPicker.pick({
-        type: [AllDocumentPicker.types.allFiles],
-        copyTo: "documentDirectory",
-        mode: "import",
-        allowMultiSelection: true,
-      });
-      const fileUri = result[0].fileCopyUri;
-      if (!fileUri) {
-        console.log("File URI is undefined or null");
-        return;
-      }
-      if (fileUri.indexOf(".png") !== -1 || fileUri.indexOf(".jpg") !== -1) {
-        setImagePaths([fileUri]);
-        setIsAttachImage(true);
-      } else {
-        setFilePath(fileUri);
-        setIsAttachFile(true);
-      }
-    } catch (err) {
-      if (AllDocumentPicker.isCancel(err)) {
-        console.log("User cancelled file picker");
-      } else {
-        console.log("DocumentPicker err => ", err);
-        throw err;
-      }
-    }
-  };
   const copyToClipboard = async (textToCopy: string) => {
     const copied = await Clipboard.setStringAsync(textToCopy);
     if (copied) {
       onShowToast({
-        message: "Copied to clipboard",
-        type: "success",
-        description: "",
+        message: 'Copied to clipboard',
+        type: 'success',
+        description: '',
       });
     }
   };
@@ -396,25 +449,28 @@ const Chat = () => {
     messageId,
   }: {
     textToEdit: string;
-    messageId: Id<"messages">;
+    messageId: Id<'messages'>;
   }) => {
     setIsEditing(true);
     setMessageId(messageId);
     setText(textToEdit);
   };
-  const name = conversationData?.name || "";
-  const images = conversationData?.otherUsers?.map((m) => m?.image!) || [];
+  const name = conversationData?.name || '';
+  const images = useMemo(
+    () => conversationData?.otherUsers?.map((m) => m?.image!) || [],
+    [conversationData?.otherUsers]
+  );
   const MemoizedChild = useMemo(
     () => (
       <AvatarContent
         chat
-        color={"white"}
+        color={'white'}
         name={name}
         image={images}
         hideOnlineStatus
       />
     ),
-    [name, images],
+    [name, images]
   );
   if (isPending) {
     return (
@@ -426,18 +482,18 @@ const Chat = () => {
   }
   const isInGroup = conversationData?.participants.includes(loggedInUserId);
   if (!isInGroup) {
-    return <Redirect href={"/chat"} />;
+    return <Redirect href={'/chat'} />;
   }
-  const loadEarlier = status === "CanLoadMore";
+  const loadEarlier = status === 'CanLoadMore';
   const disabled =
-    (imagePaths.length < 1 && text.trim() === "" && !filePath) || sending;
+    (imagePaths.length < 1 && text.trim() === '' && !filePath) || sending;
   const onLoadMore = () => {
     if (isLoading) return;
     loadMore(20);
   };
 
   const placeholder =
-    isAttachFile || isAttachImage ? "Add a caption..." : "type a message...";
+    isAttachFile || isAttachImage ? 'Add a caption...' : 'type a message...';
   const loggedInUserIsChief = conversationData?.creatorId === loggedInUserId;
   return (
     <Wrapper
@@ -451,12 +507,12 @@ const Chat = () => {
       <View
         style={{
           backgroundColor: colors.lightblue,
-          justifyContent: "space-between",
-          flexDirection: "row",
-          alignItems: "center",
+          justifyContent: 'space-between',
+          flexDirection: 'row',
+          alignItems: 'center',
         }}
       >
-        <NavHeader color={"white"} avatarContent={MemoizedChild} title="" />
+        <NavHeader color={'white'} avatarContent={MemoizedChild} title="" />
         <GroupChatMenu
           conversationId={conversationId!}
           loggedInUserIsChief={loggedInUserIsChief}
@@ -474,7 +530,7 @@ const Chat = () => {
           )}
           loadEarlier={loadEarlier}
           onLoadEarlier={onLoadMore}
-          keyboardShouldPersistTaps={"always"}
+          keyboardShouldPersistTaps={'always'}
           placeholder={placeholder}
           onSend={(messages: any) => onSend(messages)}
           onInputTextChanged={setText}
@@ -496,7 +552,7 @@ const Chat = () => {
           alwaysShowSend={true}
           renderUsernameOnMessage={true}
           renderUsername={(user) => (
-            <Text style={{ fontSize: 10, color: "white", paddingLeft: 7 }}>
+            <Text style={{ fontSize: 10, color: 'white', paddingLeft: 7 }}>
               {user.name}
             </Text>
           )}
@@ -507,13 +563,14 @@ const Chat = () => {
               showActionSheetWithOptions={showActionSheetWithOptions}
               onEdit={onEdit}
               onDelete={onDelete}
+              loggedInUserId={loggedInUserId}
             />
           )}
           renderActions={(props) => (
             <RenderActions
               disable={imagePaths.length > 0}
               {...props}
-              onPickDocument={_pickDocument}
+              onPickDocument={onPickImage}
             />
           )}
           renderTime={(props) => (
@@ -530,7 +587,7 @@ const Chat = () => {
             />
           )}
           renderComposer={(props) => (
-            <RenderComposer {...props} onPickImage={onPickImage} />
+            <RenderComposer {...props} onPickImage={onOpenCamera} />
           )}
           renderFooter={renderChatFooter}
           renderSend={(props) => (
@@ -542,7 +599,7 @@ const Chat = () => {
             />
           )}
         />
-        {Platform.OS === "android" && (
+        {Platform.OS === 'android' && (
           <KeyboardAvoidingView behavior="height" />
         )}
       </View>
@@ -561,12 +618,12 @@ const styles = StyleSheet.create({
   paperClip: {
     marginTop: 8,
     marginHorizontal: 5,
-    transform: [{ rotateY: "180deg" }],
+    transform: [{ rotateY: '180deg' }],
   },
   sendButton: { marginBottom: 10, marginRight: 10 },
   sendContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 
   fileContainer: {
@@ -584,42 +641,42 @@ const styles = StyleSheet.create({
   },
   textTime: {
     fontSize: 10,
-    color: "gray",
+    color: 'gray',
     marginLeft: 2,
   },
   buttonFooterChat: {
     width: 20,
     height: 20,
     borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    borderColor: "black",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    borderColor: 'black',
     right: 3,
     top: -2,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     zIndex: 2,
   },
   buttonFooterChatImg: {
     width: 25,
     height: 25,
     borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    borderColor: "black",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    borderColor: 'black',
     left: 55,
     top: -4,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
     padding: 5,
   },
   textFooterChat: {
     fontSize: 15,
-    fontWeight: "bold",
-    color: "gray",
+    fontWeight: 'bold',
+    color: 'gray',
   },
   chatFooter: {
-    shadowColor: "#1F2687",
+    shadowColor: '#1F2687',
     flexGrow: 1,
     shadowOpacity: 0.37,
     shadowRadius: 8,
@@ -628,8 +685,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.18)",
-    flexDirection: "row",
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    flexDirection: 'row',
     padding: 5,
     backgroundColor: colors.lightblue,
     gap: 10,
