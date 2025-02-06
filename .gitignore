@@ -19,3 +19,7 @@ web-build/
 expo-env.d.ts
 # @end expo-cli
 .env.local
+
+fpno-4bdf7-firebase-adminsdk-fbsvc-7aa34d21dc.json
+
+google-services.json

@@ -14,7 +14,10 @@ import { Spacer } from "@/components/ui/Divider";
 
 export const InfoCard = ({ item }: { item: LecturesType }) => {
   return (
-    <TouchableOpacity activeOpacity={0.5} style={{ marginBottom: 5, gap: 5 }}>
+    <TouchableOpacity
+      activeOpacity={0.5}
+      style={{ marginBottom: 5, gap: 5, paddingBottom: 20 }}
+    >
       <View style={styles.container}>
         <View style={styles.subContainer}>
           <View style={{ flex: 1 }}>
@@ -56,9 +59,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.6),
     fontFamily: "NunitoBold",
     color: colors.black,
-    lineHeight: 20,
+    // lineHeight: 20,
   },
 });

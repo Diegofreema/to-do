@@ -13,6 +13,33 @@ import "react-native-reanimated";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexQueryClient } from "@convex-dev/react-query";
 import * as Updates from "expo-updates";
+import { NotificationProvider } from "@/utils/context/NotificationContext";
+import * as Notifications from "expo-notifications";
+import * as TaskManager from "expo-task-manager";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
+const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
+
+TaskManager.defineTask(
+  BACKGROUND_NOTIFICATION_TASK,
+  ({ data, error, executionInfo }) => {
+    console.log("✅ Received a notification in the background!", {
+      data,
+      error,
+      executionInfo,
+    });
+    // Do something with the notification data
+  },
+);
+
+Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
 });
@@ -71,16 +98,18 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="dark" />
-      <ConvexProvider client={convex}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <QueryClientProvider client={queryClient}>
-            <Toast />
-            <ActionSheetProvider>
-              <Slot screenOptions={{ headerShown: false }} />
-            </ActionSheetProvider>
-          </QueryClientProvider>
-        </GestureHandlerRootView>
-      </ConvexProvider>
+      <NotificationProvider>
+        <ConvexProvider client={convex}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <QueryClientProvider client={queryClient}>
+              <Toast />
+              <ActionSheetProvider>
+                <Slot screenOptions={{ headerShown: false }} />
+              </ActionSheetProvider>
+            </QueryClientProvider>
+          </GestureHandlerRootView>
+        </ConvexProvider>
+      </NotificationProvider>
     </>
   );
 }

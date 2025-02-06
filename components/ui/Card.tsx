@@ -9,7 +9,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "white",
     borderRadius: 8,
-    padding: 10,
+    padding: 15,
+    paddingVertical: 20,
     gap: 10,
   },
 });

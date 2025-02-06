@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-
+import * as WebBrowser from "expo-web-browser";
 import { AnimatedCard } from "@/components/animated/AnimatedCard";
 import { ErrorComponent } from "@/components/ErrorComponent";
 import { BoxSkeleton } from "@/components/Skeletons/BoxeSkeleton";
@@ -44,7 +44,7 @@ export const Boxes = () => {
   if (isError) {
     return <ErrorComponent onPress={refetch} />;
   }
-  if (isPending || !user) {
+  if (isPending || user === undefined) {
     return <BoxSkeleton />;
   }
 
@@ -83,7 +83,8 @@ const Box = ({
   index: number;
 }) => {
   const onPress = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await WebBrowser.openBrowserAsync("https://fpn.netpro.software/login");
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   const img = images[index];

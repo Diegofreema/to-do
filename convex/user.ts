@@ -86,12 +86,10 @@ export const getUserById = query({
 export const checkIfUserIsInDb = query({
   args: { id: v.string() },
   handler: async (ctx, args) => {
-    const user = await ctx.db
+    return await ctx.db
       .query("users")
       .withIndex("by_userId", (q) => q.eq("userId", args.id))
       .first();
-
-    return user ? "found" : "not found";
   },
 });
 
@@ -102,11 +100,11 @@ export const addUserToDb = mutation({
     department: v.string(),
     faculty: v.string(),
     userId: v.string(),
+    pushToken: v.optional(v.union(v.string(), v.null())),
   },
   handler: async (ctx, args) => {
-    await ctx.db.insert("users", {
+    return await ctx.db.insert("users", {
       ...args,
-      pushToken: null,
       isOnline: true,
     });
   },

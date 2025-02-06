@@ -29,7 +29,7 @@ export const IconText = ({
     <View
       style={[{ flexDirection: "row", alignItems: "center", gap: 5 }, style]}
     >
-      <Icon color={colors.lightblue} size={20} />
+      <Icon color={colors.lightblue} size={RFPercentage(2)} />
       <Text
         style={[
           styles.subText,
@@ -49,7 +49,6 @@ export const IconText = ({
 
 const styles = StyleSheet.create({
   subText: {
-    fontSize: RFPercentage(1.5),
     color: colors.textGray,
     fontFamily: "NunitoRegular",
   },

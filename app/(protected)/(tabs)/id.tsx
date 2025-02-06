@@ -3,9 +3,7 @@ import { ScrollWrapper } from '@/components/ui/Wrapper';
 import React from 'react';
 import { View } from 'react-native';
 
-type Props = {};
-
-const id = (props: Props) => {
+const id = () => {
   return (
     <ScrollWrapper>
       <View style={{ paddingTop: 50 }}>

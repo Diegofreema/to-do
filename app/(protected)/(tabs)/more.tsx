@@ -96,7 +96,7 @@ const More = () => {
             style={styles.container}
           >
             <Title text={"Change Pin"} textStyle={styles.title} />
-            <IconPencil size={28} color={colors.black} />
+            <IconPencil size={RFPercentage(2.5)} color={colors.black} />
           </TouchableOpacity>
         )}
 
@@ -126,7 +126,10 @@ const More = () => {
         >
           <Title text={"Support"} textStyle={styles.title} />
 
-          <IconInfoSquareRounded color={colors.black} size={28} />
+          <IconInfoSquareRounded
+            color={colors.black}
+            size={RFPercentage(2.5)}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={onLogout}
@@ -135,7 +138,7 @@ const More = () => {
         >
           <Title text={"Logout"} textStyle={styles.title} />
 
-          <IconLogout color={colors.red} size={28} />
+          <IconLogout color={colors.red} size={RFPercentage(2.5)} />
         </TouchableOpacity>
       </Stack>
     </Wrapper>

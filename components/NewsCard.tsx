@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "NunitoBold",
     color: colors.lightblue,
-    lineHeight: 20,
+
     marginBottom: 10,
   },
   subText: {

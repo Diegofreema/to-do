@@ -29,7 +29,6 @@ import { useTempData } from "@/lib/zustand/useTempData";
 import { Resend } from "@/components/Resend";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { setUserToOnline } from "@/convex/user";
 
 const OFFSET = 20;
 const TIME = 80;
@@ -58,9 +57,7 @@ export const TokenForm = () => {
   const user = useTempData((state) => state.user);
   const getUser = useAuth((state) => state.getUser);
   const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: offset.value }],
-    };
+    return { transform: [{ translateX: offset.value }] };
   });
   const onPress = (item: (typeof dialPads)[number]) => {
     if (item === "del" && code.length > 0) {
@@ -128,7 +125,17 @@ export const TokenForm = () => {
       });
       setTimeout(() => setCode([]), TIME * 2);
     }
-  }, [code, offset, token, user, getUser, details, setDetails, onShow]);
+  }, [
+    code,
+    offset,
+    token,
+    user,
+    getUser,
+    details,
+    setDetails,
+    onShow,
+    setOnline,
+  ]);
   const resend = async () => {
     setSending(true);
     try {

@@ -20,6 +20,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { View } from "react-native";
 import { UnreadCount } from "@/components/UnreadCount";
+import { RFPercentage } from "react-native-responsive-fontsize";
 
 export default function TabLayout() {
   const id = useAuth((state) => state.user.id);
@@ -38,8 +39,12 @@ export default function TabLayout() {
             headerShown: false,
             tabBarButton: HapticTab,
             tabBarBackground: TabBarBackground,
-            tabBarLabelStyle: { fontFamily: "NunitoBold", fontSize: 12 },
-            tabBarStyle: { backgroundColor: "white" },
+            tabBarLabelStyle: {
+              fontFamily: "NunitoBold",
+              fontSize: RFPercentage(1.2),
+            },
+            tabBarStyle: { backgroundColor: "white", paddingTop: 10 },
+            tabBarLabelPosition: "below-icon",
           }}
         >
           <Tabs.Screen
@@ -90,6 +95,7 @@ export default function TabLayout() {
             name="chat"
             options={{
               title: "chats",
+              href: null,
               tabBarIcon: ({ size, focused }) => (
                 <View>
                   <TabIcons

@@ -16,10 +16,6 @@ import Animated, {
   FlipInEasyX,
   FlipOutEasyX,
   LinearTransition,
-  SlideInLeft,
-  SlideInRight,
-  SlideOutLeft,
-  SlideOutRight,
 } from "react-native-reanimated";
 
 const data = [
@@ -144,7 +140,13 @@ const Indicators = ({
         })}
       </View>
       <TouchableOpacity onPress={onSkip}>
-        <Text style={{ color: colors.lightblue, fontFamily: "NunitoBold" }}>
+        <Text
+          style={{
+            color: colors.lightblue,
+            fontFamily: "NunitoBold",
+            fontSize: RFPercentage(1.7),
+          }}
+        >
           Skip
         </Text>
       </TouchableOpacity>

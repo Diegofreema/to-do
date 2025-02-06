@@ -14,14 +14,19 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.diegodark.nekede"
+      "bundleIdentifier": "com.diegodark.nekede",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification", "fetch"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.diegodark.nekede"
+      "package": "com.diegodark.nekede",
+      "googleServicesFile": "./google-services.json"
+
     },
     "web": {
       "bundler": "metro",
@@ -30,6 +35,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-updates",
+        {
+          "username": "diegodark"
+        }
+      ],
       [
         "expo-build-properties",
         {
@@ -58,7 +69,6 @@
           "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera."
         }
       ]
-
     ],
     "experiments": {
       "typedRoutes": true
@@ -71,7 +81,9 @@
         "origin": false
       }
     },
-    "runtimeVersion": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "updates": {
       "url": "https://u.expo.dev/4cc2df4f-c1a1-40d5-a034-186a7a92a5cc"
     }

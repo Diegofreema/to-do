@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   contentContainerStyle: {
-    gap: 20,
+    gap: 25,
     borderWidth: 1,
     borderColor: colors.border,
     paddingHorizontal: 10,
