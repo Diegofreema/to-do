@@ -1,10 +1,10 @@
-import { useCallback, useState } from "react";
-import { GiftedChat } from "react-native-gifted-chat";
-import { useShowToast } from "@/lib/zustand/useShowToast";
-import { uploadProfilePicture } from "@/helper";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { useCallback, useState } from 'react';
+import { GiftedChat } from 'react-native-gifted-chat';
+import { useShowToast } from '@/lib/zustand/useShowToast';
+import { uploadProfilePicture } from '@/helper';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 
 interface Message {
   _id: string;
@@ -17,10 +17,10 @@ interface Message {
 }
 
 export const useMessageSender = (
-  conversationId: Id<"conversations">,
-  loggedInUserId: Id<"users">,
-  recipients: Id<"users">[],
-  playSoundOut: () => Promise<void>,
+  conversationId: Id<'conversations'>,
+  loggedInUserId: Id<'users'>,
+  recipients: Id<'users'>[],
+  playSoundOut: () => Promise<void>
 ) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [imagePaths, setImagePaths] = useState<string[]>([]);
@@ -34,14 +34,17 @@ export const useMessageSender = (
   }, []);
 
   // Helper function to handle errors
-  const handleError = useCallback((error: Error) => {
-    console.error("Message send error:", error);
-    onShowToast({
-      description: "Something went wrong, Please try again",
-      type: "error",
-      message: "Failed to send",
-    });
-  }, []);
+  const handleError = useCallback(
+    (error: Error) => {
+      console.error('Message send error:', error);
+      onShowToast({
+        description: 'Something went wrong, Please try again',
+        type: 'error',
+        message: 'Failed to send',
+      });
+    },
+    [onShowToast]
+  );
 
   // Handle image message creation
   const handleImageMessage = useCallback(
@@ -49,7 +52,7 @@ export const useMessageSender = (
       try {
         const { storageId, uploadUrl } = await uploadProfilePicture(
           image,
-          generateUploadUrl,
+          generateUploadUrl
         );
 
         await createMessage({
@@ -57,7 +60,7 @@ export const useMessageSender = (
           senderId: loggedInUserId,
           recipient: recipients,
           conversationId,
-          contentType: "image",
+          contentType: 'image',
           uploadUrl,
         });
       } catch (error) {
@@ -65,7 +68,14 @@ export const useMessageSender = (
         throw error; // Re-throw to handle in the parent
       }
     },
-    [conversationId, loggedInUserId, recipients, handleError],
+    [
+      conversationId,
+      loggedInUserId,
+      recipients,
+      handleError,
+      createMessage,
+      generateUploadUrl,
+    ]
   );
 
   // Handle text message creation
@@ -77,20 +87,20 @@ export const useMessageSender = (
           senderId: loggedInUserId,
           recipient: recipients,
           conversationId,
-          contentType: "text",
+          contentType: 'text',
         });
       } catch (error) {
         handleError(error as Error);
         throw error;
       }
     },
-    [conversationId, loggedInUserId, recipients, handleError],
+    [conversationId, loggedInUserId, recipients, handleError, createMessage]
   );
 
   const onSend = useCallback(
     async (messages: Message[] = []) => {
       if (!conversationId) {
-        handleError(new Error("No conversation ID provided"));
+        handleError(new Error('No conversation ID provided'));
         return;
       }
 
@@ -102,7 +112,7 @@ export const useMessageSender = (
           imagePaths.forEach((image, index) => {
             const newMessage: Message = {
               _id: `${messages[0]._id}-${index}-${Date.now()}`,
-              text: "",
+              text: '',
               createdAt: new Date(),
               user: { _id: loggedInUserId },
               image,
@@ -134,7 +144,8 @@ export const useMessageSender = (
       handleImageMessage,
       handleTextMessage,
       handleError,
-    ],
+      playSoundOut,
+    ]
   );
 
   return { onSend, messages };

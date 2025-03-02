@@ -1,19 +1,18 @@
-import axios from "axios";
-import { DocumentPickerResult } from "expo-document-picker";
-import { Id } from "@/convex/_generated/dataModel";
-import * as MediaLibrary from "expo-media-library";
-import * as FileSystem from "expo-file-system";
+import { Id } from '@/convex/_generated/dataModel';
+import axios from 'axios';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
 
 export const sendEmail = async (email: string, otp: string) => {
   const { data } = await axios.get(
-    `https://estate.netpro.software/sendsms.aspx?email=${email}&otp=${otp}`,
+    `https://estate.netpro.software/sendsms.aspx?email=${email}&otp=${otp}`
   );
   return data.result;
 };
 
 export const generateFromRandomNumbersOtp = () => {
   const tokenLength = 5;
-  let otp = "";
+  let otp = '';
   for (let i = 0; i < tokenLength; i++) {
     const randomNum = Math.floor(Math.random() * 9) + 1;
     otp += randomNum.toString();
@@ -22,19 +21,19 @@ export const generateFromRandomNumbersOtp = () => {
 };
 
 export const textToRender = (text: string) => {
-  let finalText = "";
-  if (text === "totallectures") {
-    finalText = "Total lectures";
+  let finalText = '';
+  if (text === 'totallectures') {
+    finalText = 'Total lectures';
   }
-  if (text === "registeredcourse") {
-    finalText = "Registered course";
+  if (text === 'registeredcourse') {
+    finalText = 'Registered course';
   }
-  if (text === "upcominglectures") {
-    finalText = "Upcoming lectures";
+  if (text === 'upcominglectures') {
+    finalText = 'Upcoming lectures';
   }
 
-  if (text === "outstandingassignment") {
-    finalText = "Outstanding assignment";
+  if (text === 'outstandingassignment') {
+    finalText = 'Outstanding assignment';
   }
   return finalText;
 };
@@ -46,23 +45,23 @@ export const breakSentenceToAnewLineIfAfterAPoint = (sentence: string) => {
     // Check if previous word ends with a period and is followed by multiple spaces
     const lineBreak =
       index > 0 &&
-      words[index - 1].endsWith(".") &&
+      words[index - 1].endsWith('.') &&
       sentence
         .slice(
           sentence.indexOf(words[index - 1]) + words[index - 1].length,
-          sentence.indexOf(word),
+          sentence.indexOf(word)
         )
         .trim().length > 1
-        ? "\n"
-        : " ";
+        ? '\n'
+        : ' ';
 
-    return result + (index > 0 ? lineBreak : "") + word;
-  }, "");
+    return result + (index > 0 ? lineBreak : '') + word;
+  }, '');
 };
 
 export const trimText = (text: string, length: number = 100) => {
   if (text.length > length) {
-    return text.slice(0, length) + "...";
+    return text.slice(0, length) + '...';
   }
 
   return text;
@@ -70,16 +69,16 @@ export const trimText = (text: string, length: number = 100) => {
 
 export const uploadDoc = async (
   url: string,
-  generateUploadUrl: any,
-): Promise<{ storageId: Id<"_storage">; uploadUrl: string }> => {
+  generateUploadUrl: any
+): Promise<{ storageId: Id<'_storage'>; uploadUrl: string }> => {
   const uploadUrl = await generateUploadUrl();
 
   const response = await fetch(url);
   const blob = await response.blob();
   const result = await fetch(uploadUrl, {
-    method: "POST",
+    method: 'POST',
     body: blob,
-    headers: { "Content-Type": "pdf" },
+    headers: { 'Content-Type': 'pdf' },
   });
   const { storageId } = await result.json();
   console.log({ storageId });
@@ -87,17 +86,17 @@ export const uploadDoc = async (
 };
 export const uploadProfilePicture = async (
   selectedImage: string,
-  generateUploadUrl: any,
-): Promise<{ storageId: Id<"_storage">; uploadUrl: string }> => {
+  generateUploadUrl: any
+): Promise<{ storageId: Id<'_storage'>; uploadUrl: string }> => {
   const uploadUrl = await generateUploadUrl();
 
   const response = await fetch(selectedImage);
   const blob = await response.blob();
 
   const result = await fetch(uploadUrl, {
-    method: "POST",
+    method: 'POST',
     body: blob,
-    headers: { "Content-Type": "image/jpeg" },
+    headers: { 'Content-Type': 'image/jpeg' },
   });
   const { storageId } = await result.json();
 
@@ -111,40 +110,40 @@ export const downloadAndSaveImage = async (imageUrl: string) => {
     const res = await FileSystem.downloadAsync(imageUrl, fileUri);
     return saveFile(res.uri);
   } catch (err) {
-    console.log("FS Err: ", err);
+    console.log('FS Err: ', err);
   }
 };
 
 const saveFile = async (fileUri: string) => {
   const { status } = await MediaLibrary.requestPermissionsAsync();
-  if (status === "granted") {
+  if (status === 'granted') {
     try {
       const asset = await MediaLibrary.createAssetAsync(fileUri);
-      const album = await MediaLibrary.getAlbumAsync("Download");
+      const album = await MediaLibrary.getAlbumAsync('Download');
       if (album == null) {
         const result = await MediaLibrary.createAlbumAsync(
-          "Download",
+          'Download',
           asset,
-          false,
+          false
         );
         if (result) {
-          return "saved";
+          return 'saved';
         }
       } else {
         const result = await MediaLibrary.addAssetsToAlbumAsync(
           [asset],
           album,
-          false,
+          false
         );
         if (result) {
-          return "saved";
+          return 'saved';
         }
       }
     } catch (err) {
-      console.log("Save err: ", err);
-      throw new Error("Failed to save image");
+      console.log('Save err: ', err);
+      throw new Error('Failed to save image');
     }
-  } else if (status === "denied") {
-    throw new Error("please allow permissions to download");
+  } else if (status === 'denied') {
+    throw new Error('please allow permissions to download');
   }
 };

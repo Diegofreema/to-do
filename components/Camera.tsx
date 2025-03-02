@@ -9,7 +9,7 @@ import {
   IconRotate,
   IconX,
 } from '@tabler/icons-react-native';
-import { Href, router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import {
@@ -26,7 +26,7 @@ export const CameraComponent = () => {
   const camera = useRef<Camera>(null);
   const [mode, setMode] = useState<CameraPosition>('back');
   const [flash, setFlash] = useState<'on' | 'off' | 'auto'>('off');
-  const { path } = useLocalSearchParams<{ path: string }>();
+  // const { path } = useLocalSearchParams<{ path: string }>();
   const device = useCameraDevice(mode);
   const takePhoto = async () => {
     const photo = await camera?.current?.takePhoto({

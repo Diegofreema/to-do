@@ -1,5 +1,5 @@
-import * as ImagePicker from "expo-image-picker";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import * as ImagePicker from 'expo-image-picker';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -9,59 +9,59 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import { GiftedChat, SystemMessage, Time } from "react-native-gifted-chat";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+} from 'react-native';
+import { GiftedChat, SystemMessage, Time } from 'react-native-gifted-chat';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import Colors from "@/Colors";
-import { RenderActions } from "@/components/RenderAction";
-import { RenderBubble } from "@/components/RenderBubble";
-import { RenderComposer } from "@/components/RenderComposer";
-import { RenderImage } from "@/components/RenderImage";
-import { RenderSend } from "@/components/RenderSend";
-import { ChatSkeletonUI } from "@/components/Skeletons/ChatSkeleton";
-import { AvatarContent } from "@/components/ui/AvatarContent";
-import { Spacer } from "@/components/ui/Divider";
-import { ErrorComponent } from "@/components/ui/ErrorComponent";
-import { NavHeader } from "@/components/ui/NavHeader";
-import { Wrapper } from "@/components/ui/Wrapper";
-import { colors } from "@/constants";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
-import { uploadProfilePicture } from "@/helper";
-import { useCreateConversation } from "@/hooks/useCreateConversation";
-import { useMarkRead } from "@/hooks/useMarkRead";
-import { useMessages } from "@/hooks/useMessages";
-import { useGetImage } from "@/lib/zustand/useGetImage";
-import { useId } from "@/lib/zustand/useId";
-import { useShowToast } from "@/lib/zustand/useShowToast";
-import { convexQuery } from "@convex-dev/react-query";
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import { useQuery as useTanstackQuery } from "@tanstack/react-query";
-import { useMutation, usePaginatedQuery } from "convex/react";
-import * as Clipboard from "expo-clipboard";
-import { Image } from "expo-image";
+import Colors from '@/Colors';
+import { RenderActions } from '@/components/RenderAction';
+import { RenderBubble } from '@/components/RenderBubble';
+import { RenderComposer } from '@/components/RenderComposer';
+import { RenderImage } from '@/components/RenderImage';
+import { RenderSend } from '@/components/RenderSend';
+import { ChatSkeletonUI } from '@/components/Skeletons/ChatSkeleton';
+import { AvatarContent } from '@/components/ui/AvatarContent';
+import { Spacer } from '@/components/ui/Divider';
+import { ErrorComponent } from '@/components/ui/ErrorComponent';
+import { NavHeader } from '@/components/ui/NavHeader';
+import { Wrapper } from '@/components/ui/Wrapper';
+import { colors } from '@/constants';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
+import { uploadProfilePicture } from '@/helper';
+import { useCreateConversation } from '@/hooks/useCreateConversation';
+import { useMarkRead } from '@/hooks/useMarkRead';
+import { useMessages } from '@/hooks/useMessages';
+import { useGetImage } from '@/lib/zustand/useGetImage';
+import { useId } from '@/lib/zustand/useId';
+import { useShowToast } from '@/lib/zustand/useShowToast';
+import { convexQuery } from '@convex-dev/react-query';
+import { useActionSheet } from '@expo/react-native-action-sheet';
+import { useQuery as useTanstackQuery } from '@tanstack/react-query';
+import { useMutation, usePaginatedQuery } from 'convex/react';
+import * as Clipboard from 'expo-clipboard';
+import { Image } from 'expo-image';
 import {
   ErrorBoundaryProps,
   router,
   useLocalSearchParams,
   usePathname,
-} from "expo-router";
-import { ScrollView } from "moti";
+} from 'expo-router';
+import { ScrollView } from 'moti';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-} from "react-native-reanimated";
-import { sendPushNotification } from "@/utils/sendPushNotification";
-import { useAuth } from "@/lib/zustand/useAuth";
+} from 'react-native-reanimated';
+import { sendPushNotification } from '@/utils/sendPushNotification';
+import { useAuth } from '@/lib/zustand/useAuth';
 
 export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
   return <ErrorComponent retry={retry} />;
 }
 
 const Chat = () => {
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
   const [hasTriedSending, setHasTriedSending] = useState(false);
   const [isAttachImage, setIsAttachImage] = useState(false);
 
@@ -70,7 +70,7 @@ const Chat = () => {
   const { showActionSheetWithOptions } = useActionSheet();
   const [sending, setSending] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [messageId, setMessageId] = useState<Id<"messages"> | null>(null);
+  const [messageId, setMessageId] = useState<Id<'messages'> | null>(null);
   const editText = useMutation(api.message.editMessage);
   const generateUploadUrl = useMutation(api.chat.generateUploadUrl);
   const pathname = usePathname();
@@ -80,7 +80,7 @@ const Chat = () => {
   };
   const insets = useSafeAreaInsets();
 
-  const { id } = useLocalSearchParams<{ id: Id<"users"> }>();
+  const { id } = useLocalSearchParams<{ id: Id<'users'> }>();
   const loggedInUserId = useId((state) => state.id!);
   const senderName = useAuth((state) => state.user.fname);
   const img = useGetImage((state) => state.image);
@@ -91,14 +91,14 @@ const Chat = () => {
     convexQuery(api.conversation.getSingleConversationWithMessages, {
       loggedInUserId,
       otherUserId: id,
-    }),
+    })
   );
   const { results, status, loadMore, isLoading } = usePaginatedQuery(
     api.conversation.getMessages,
     {
       conversationId: conversationData?.conversation?._id!,
     },
-    { initialNumItems: 50 },
+    { initialNumItems: 50 }
   );
   const pushToken = conversationData?.otherUser?.pushToken!;
   const { messages, setMessages } = useMessages({
@@ -153,11 +153,11 @@ const Chat = () => {
     try {
       const { storageId, uploadUrl } = await uploadProfilePicture(
         img,
-        generateUploadUrl,
+        generateUploadUrl
       );
 
       if (!storageId || !uploadUrl) {
-        new Error("Failed to upload image");
+        new Error('Failed to upload image');
       }
 
       await createMessage({
@@ -165,25 +165,25 @@ const Chat = () => {
         senderId: loggedInUserId,
         recipient,
         conversationId,
-        contentType: "image",
+        contentType: 'image',
         uploadUrl,
       });
       await sendPushNotification(
         pushToken,
         senderName,
-        "Sent you a image",
-        conversationId,
+        'Sent you a image',
+        conversationId
       );
       removeImage();
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      console.error("Image send error:", errorMessage);
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Image send error:', errorMessage);
 
       onShowToast({
-        description: "Failed to send image. Please try again",
-        type: "error",
-        message: "Send Failed",
+        description: 'Failed to send image. Please try again',
+        type: 'error',
+        message: 'Send Failed',
       });
     } finally {
       setSending(false);
@@ -197,6 +197,8 @@ const Chat = () => {
     onShowToast,
     recipient,
     removeImage,
+    pushToken,
+    senderName,
   ]);
   console.log({ img });
 
@@ -223,9 +225,9 @@ const Chat = () => {
         } catch (e) {
           console.log(e);
           onShowToast({
-            description: "Something went wrong, Please try again",
-            type: "error",
-            message: "Failed to edit",
+            description: 'Something went wrong, Please try again',
+            type: 'error',
+            message: 'Failed to edit',
           });
         } finally {
           setMessageId(null);
@@ -238,7 +240,7 @@ const Chat = () => {
             imagePaths.map(async (image) => {
               const { storageId, uploadUrl } = await uploadProfilePicture(
                 image,
-                generateUploadUrl,
+                generateUploadUrl
               );
               try {
                 await createMessage({
@@ -246,56 +248,56 @@ const Chat = () => {
                   senderId: loggedInUserId,
                   recipient: recipient,
                   conversationId,
-                  contentType: "image",
+                  contentType: 'image',
                   uploadUrl,
                 });
                 await sendPushNotification(
                   pushToken,
                   senderName,
-                  "Sent you a image",
-                  conversationId,
+                  'Sent you a image',
+                  conversationId
                 );
 
-                if (text.trim() === "") return;
+                if (text.trim() === '') return;
                 try {
                   await createMessage({
                     content: text.trim(),
                     senderId: loggedInUserId,
                     recipient,
                     conversationId,
-                    contentType: "text",
+                    contentType: 'text',
                   });
                   await sendPushNotification(
                     pushToken,
                     senderName,
                     text.trim(),
-                    conversationId,
+                    conversationId
                   );
                 } catch (e) {
                   console.log(e);
                   onShowToast({
-                    type: "error",
-                    description: "Failed to send text",
-                    message: "Error",
+                    type: 'error',
+                    description: 'Failed to send text',
+                    message: 'Error',
                   });
                 }
               } catch (e) {
                 console.log(e);
                 onShowToast({
-                  description: "Something went wrong, Please try again",
-                  type: "error",
-                  message: "Failed to send",
+                  description: 'Something went wrong, Please try again',
+                  type: 'error',
+                  message: 'Failed to send',
                 });
               } finally {
                 setImagePaths([]);
                 setIsAttachImage(false);
                 setSending(false);
               }
-            }),
+            })
           );
         } else {
           setMessages((previousMessages) =>
-            GiftedChat.append(previousMessages, messages),
+            GiftedChat.append(previousMessages, messages)
           );
           try {
             await createMessage({
@@ -303,20 +305,20 @@ const Chat = () => {
               senderId: loggedInUserId,
               recipient: conversationData?.otherUser?._id!,
               conversationId,
-              contentType: "text",
+              contentType: 'text',
             });
             await sendPushNotification(
               pushToken,
               senderName,
               text.trim(),
-              conversationId,
+              conversationId
             );
           } catch (e) {
             console.log(e);
             onShowToast({
-              description: "Something went wrong, Please try again",
-              type: "error",
-              message: "Failed to send",
+              description: 'Something went wrong, Please try again',
+              type: 'error',
+              message: 'Failed to send',
             });
           } finally {
             setSending(false);
@@ -331,7 +333,8 @@ const Chat = () => {
       conversationData,
       conversationId,
       isAttachImage,
-
+      pushToken,
+      senderName,
       imagePaths,
       messageId,
       isEditing,
@@ -341,7 +344,7 @@ const Chat = () => {
       onShowToast,
       recipient,
       setMessages,
-    ],
+    ]
   );
 
   // const _pickDocument = async () => {
@@ -370,19 +373,19 @@ const Chat = () => {
   //   }
   // };
 
-  const disabled = (imagePaths.length < 1 && text.trim() === "") || sending;
-  const onDelete = (messageId: Id<"messages">) => {
+  const disabled = (imagePaths.length < 1 && text.trim() === '') || sending;
+  const onDelete = (messageId: Id<'messages'>) => {
     const storageId = results.find((r) => r._id === messageId)?.storageId;
-    Alert.alert("This is irreversible", "Delete this message for everyone?", [
+    Alert.alert('This is irreversible', 'Delete this message for everyone?', [
       {
-        text: "Cancel",
-        onPress: () => console.log("Cancel Pressed"),
-        style: "cancel",
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
       },
       {
-        text: "Delete",
+        text: 'Delete',
         onPress: () => deleteMessage({ messageId, storage: storageId }),
-        style: "destructive",
+        style: 'destructive',
       },
     ]);
   };
@@ -390,9 +393,9 @@ const Chat = () => {
     const copied = await Clipboard.setStringAsync(textToCopy);
     if (copied) {
       onShowToast({
-        message: "Copied to clipboard",
-        type: "success",
-        description: "",
+        message: 'Copied to clipboard',
+        type: 'success',
+        description: '',
       });
     }
   };
@@ -401,7 +404,7 @@ const Chat = () => {
     messageId,
   }: {
     textToEdit: string;
-    messageId: Id<"messages">;
+    messageId: Id<'messages'>;
   }) => {
     setIsEditing(true);
     setMessageId(messageId);
@@ -419,9 +422,9 @@ const Chat = () => {
       setIsAttachImage(true);
     }
   };
-  const name = conversationData?.otherUser?.name || "";
+  const name = conversationData?.otherUser?.name || '';
   const isOnline = conversationData?.otherUser?.isOnline || false;
-  const image = conversationData?.otherUser?.image || "";
+  const image = conversationData?.otherUser?.image || '';
   const renderChatFooter = useCallback(() => {
     return (
       <Animated.View style={animatedStyle}>
@@ -459,25 +462,25 @@ const Chat = () => {
       <AvatarContent
         chat
         isOnline={isOnline}
-        color={"white"}
+        color={'white'}
         name={name}
         image={image}
       />
     ),
-    [name, image, isOnline],
+    [name, image, isOnline]
   );
   if (loading || isPending) {
     return (
       <>
         <Spacer space={insets.top} />
-        {Platform.OS === "ios" ? (
+        {Platform.OS === 'ios' ? (
           <ChatSkeletonUI />
         ) : (
           <View
             style={{
               flex: 0.8,
-              justifyContent: "center",
-              alignItems: "center",
+              justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
             <ActivityIndicator size="large" color={colors.lightblue} />
@@ -486,7 +489,7 @@ const Chat = () => {
       </>
     );
   }
-  const loadEarlier = status === "CanLoadMore";
+  const loadEarlier = status === 'CanLoadMore';
   const onLoadMore = () => {
     if (isLoading) return;
     loadMore(20);
@@ -501,14 +504,14 @@ const Chat = () => {
       }}
     >
       <View style={{ backgroundColor: colors.lightblue }}>
-        <NavHeader color={"white"} avatarContent={MemoizedChild} title="" />
+        <NavHeader color={'white'} avatarContent={MemoizedChild} title="" />
       </View>
       <View style={{ flex: 1 }}>
         <GiftedChat
           messages={messages}
           loadEarlier={loadEarlier}
           onLoadEarlier={onLoadMore}
-          keyboardShouldPersistTaps={"always"}
+          keyboardShouldPersistTaps={'always'}
           onSend={(messages: any) => onSend(messages)}
           onInputTextChanged={setText}
           user={{
@@ -531,7 +534,7 @@ const Chat = () => {
             />
           )}
           renderUsername={(user) => (
-            <Text style={{ fontSize: 10, color: "white", paddingLeft: 7 }}>
+            <Text style={{ fontSize: 10, color: 'white', paddingLeft: 7 }}>
               {user.name}
             </Text>
           )}
@@ -579,7 +582,7 @@ const Chat = () => {
           )}
           alwaysShowSend
         />
-        {Platform.OS === "android" && (
+        {Platform.OS === 'android' && (
           <KeyboardAvoidingView behavior="height" />
         )}
       </View>
@@ -598,12 +601,12 @@ const styles = StyleSheet.create({
   paperClip: {
     marginTop: 8,
     marginHorizontal: 5,
-    transform: [{ rotateY: "180deg" }],
+    transform: [{ rotateY: '180deg' }],
   },
   sendButton: { marginBottom: 10, marginRight: 10 },
   sendContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 
   fileContainer: {
@@ -621,42 +624,42 @@ const styles = StyleSheet.create({
   },
   textTime: {
     fontSize: 10,
-    color: "gray",
+    color: 'gray',
     marginLeft: 2,
   },
   buttonFooterChat: {
     width: 20,
     height: 20,
     borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    borderColor: "black",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    borderColor: 'black',
     right: 3,
     top: -2,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     zIndex: 2,
   },
   buttonFooterChatImg: {
     width: 25,
     height: 25,
     borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    borderColor: "black",
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    borderColor: 'black',
     left: 55,
     top: -4,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
     padding: 5,
   },
   textFooterChat: {
     fontSize: 15,
-    fontWeight: "bold",
-    color: "gray",
+    fontWeight: 'bold',
+    color: 'gray',
   },
   chatFooter: {
-    shadowColor: "#1F2687",
+    shadowColor: '#1F2687',
     flexGrow: 1,
     shadowOpacity: 0.37,
     shadowRadius: 8,
@@ -665,8 +668,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.18)",
-    flexDirection: "row",
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    flexDirection: 'row',
     padding: 5,
     backgroundColor: colors.lightblue,
     gap: 10,

@@ -1,11 +1,11 @@
-import { useEffect } from "react";
-import { Id } from "@/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useEffect } from 'react';
+import { Id } from '@/convex/_generated/dataModel';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 type Conversation = {
-  loggedInUserId: Id<"users">;
-  id: Id<"users">;
+  loggedInUserId: Id<'users'>;
+  id: Id<'users'>;
   setLoading: (value: React.SetStateAction<boolean>) => void;
   isConversationIsNull: boolean;
 };
@@ -16,7 +16,7 @@ export const useCreateConversation = ({
   isConversationIsNull,
 }: Conversation) => {
   const createSingleConversation = useMutation(
-    api.conversation.createSingleConversation,
+    api.conversation.createSingleConversation
   );
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export const useCreateConversation = ({
           await createSingleConversation({ loggedInUserId, otherUserId: id });
         } catch (e) {
           console.log(e);
-          throw Error("Something went wrong");
+          throw Error('Something went wrong');
         } finally {
           setLoading(false);
         }
@@ -35,5 +35,11 @@ export const useCreateConversation = ({
 
       createConvo();
     }
-  }, [isConversationIsNull, createSingleConversation, loggedInUserId, id]);
+  }, [
+    isConversationIsNull,
+    createSingleConversation,
+    loggedInUserId,
+    id,
+    setLoading,
+  ]);
 };

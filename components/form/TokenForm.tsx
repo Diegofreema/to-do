@@ -1,8 +1,8 @@
-import { IconBackspace } from "@tabler/icons-react-native";
-import * as Haptics from "expo-haptics";
-import { useLocalSearchParams } from "expo-router";
-import { MotiView } from "moti";
-import { useEffect, useState } from "react";
+import { IconBackspace } from '@tabler/icons-react-native';
+import * as Haptics from 'expo-haptics';
+import { useLocalSearchParams } from 'expo-router';
+import { MotiView } from 'moti';
+import { useEffect, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -10,30 +10,30 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 
-import { AnimatedContainerToken } from "@/components/animated/AnimatedContainer";
-import { colors } from "@/constants";
-import { sendEmail } from "@/helper";
-import { useAuth } from "@/lib/zustand/useAuth";
-import { useShowToast } from "@/lib/zustand/useShowToast";
-import { useStoreId } from "@/lib/zustand/useStoreId";
-import { useTempData } from "@/lib/zustand/useTempData";
-import { Resend } from "@/components/Resend";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { AnimatedContainerToken } from '@/components/animated/AnimatedContainer';
+import { colors } from '@/constants';
+import { sendEmail } from '@/helper';
+import { useAuth } from '@/lib/zustand/useAuth';
+import { useShowToast } from '@/lib/zustand/useShowToast';
+import { useStoreId } from '@/lib/zustand/useStoreId';
+import { useTempData } from '@/lib/zustand/useTempData';
+import { Resend } from '@/components/Resend';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 const OFFSET = 20;
 const TIME = 80;
-const dialPads = [1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0, "del"];
-const { width } = Dimensions.get("window");
+const dialPads = [1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'del'];
+const { width } = Dimensions.get('window');
 const pinLength = 5;
 const pinContainerSize = width / 2;
 const pinMaxSize = pinContainerSize / pinLength;
@@ -60,9 +60,9 @@ export const TokenForm = () => {
     return { transform: [{ translateX: offset.value }] };
   });
   const onPress = (item: (typeof dialPads)[number]) => {
-    if (item === "del" && code.length > 0) {
+    if (item === 'del' && code.length > 0) {
       setCode((prev) => prev?.slice(0, prev?.length - 1));
-    } else if (typeof item === "number") {
+    } else if (typeof item === 'number') {
       if (code.length === pinLength) return;
       setCode((prev) => [...prev, item]);
     }
@@ -91,7 +91,7 @@ export const TokenForm = () => {
   }, [isActive, timeLeft]);
 
   useEffect(() => {
-    const isValid = token === code.join("");
+    const isValid = token === code.join('');
     const isFilled = code.length === pinLength;
     const onSetOnline = async () => {
       await setOnline({ id: user.id });
@@ -104,9 +104,9 @@ export const TokenForm = () => {
         getUser(user);
         onSetOnline();
         onShow({
-          message: "Success",
-          description: "Welcome back",
-          type: "success",
+          message: 'Success',
+          description: 'Welcome back',
+          type: 'success',
         });
       }, 500);
 
@@ -115,13 +115,13 @@ export const TokenForm = () => {
       offset.value = withSequence(
         withTiming(-OFFSET, { duration: TIME / 2 }),
         withRepeat(withTiming(OFFSET, { duration: TIME }), 4, true),
-        withTiming(0, { duration: TIME / 2 }),
+        withTiming(0, { duration: TIME / 2 })
       );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       onShow({
-        message: "Error",
-        description: "Token does not match",
-        type: "error",
+        message: 'Error',
+        description: 'Token does not match',
+        type: 'error',
       });
       setTimeout(() => setCode([]), TIME * 2);
     }
@@ -143,15 +143,15 @@ export const TokenForm = () => {
       setIsActive(false);
       setTimeLeft(60);
       onShow({
-        message: "Success",
-        type: "success",
-        description: "Otp has been sent to your mail",
+        message: 'Success',
+        type: 'success',
+        description: 'Otp has been sent to your mail',
       });
-    } catch (e) {
+    } catch {
       onShow({
-        message: "Failed",
-        type: "error",
-        description: "Could not resend, please try again",
+        message: 'Failed',
+        type: 'error',
+        description: 'Could not resend, please try again',
       });
     } finally {
       setSending(false);
@@ -160,7 +160,7 @@ export const TokenForm = () => {
   const disabled = timeLeft > 0 || sending;
   return (
     <AnimatedContainerToken>
-      <View style={{ alignItems: "center", justifyContent: "center" }}>
+      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={[styles.pinContainer, animatedStyle]}>
           {[...Array(pinLength).keys()].map((i) => {
             const isSelected = code[i] !== undefined && code[i] !== null;
@@ -168,7 +168,7 @@ export const TokenForm = () => {
               <MotiView
                 key={i}
                 style={[styles.pin]}
-                transition={{ type: "timing", duration: 100 }}
+                transition={{ type: 'timing', duration: 100 }}
                 animate={{
                   height: isSelected ? pinSize : 2,
                   marginBottom: isSelected ? pinSize / 2 : 0,
@@ -185,16 +185,16 @@ export const TokenForm = () => {
           data={dialPads}
           renderItem={({ item }) => (
             <TouchableOpacity
-              disabled={item === ""}
+              disabled={item === ''}
               onPress={() => onPress(item)}
             >
               <View
                 style={[
                   styles.container,
-                  { borderWidth: item === "" || item === "del" ? 0 : 1 },
+                  { borderWidth: item === '' || item === 'del' ? 0 : 1 },
                 ]}
               >
-                {item === "del" ? (
+                {item === 'del' ? (
                   <IconBackspace
                     color={colors.black}
                     size={dialPadItemSize * 2}
@@ -220,19 +220,19 @@ const styles = StyleSheet.create({
     width: dialPadSize,
     height: dialPadSize,
     borderRadius: dialPadSize,
-    borderColor: "black",
-    justifyContent: "center",
-    alignItems: "center",
+    borderColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   text: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: dialPadItemSize,
-    fontFamily: "NunitoRegular",
+    fontFamily: 'NunitoRegular',
   },
   pinContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: pinSpacing * 2,
-    alignItems: "flex-end",
+    alignItems: 'flex-end',
     marginBottom: spacing * 2,
     height: pinSize * 2,
   },

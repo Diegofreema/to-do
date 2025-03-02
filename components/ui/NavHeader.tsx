@@ -1,11 +1,10 @@
-import { IconArrowNarrowLeft } from "@tabler/icons-react-native";
-import { StyleProp, TouchableOpacity, View, ViewStyle } from "react-native";
-import { RFPercentage } from "react-native-responsive-fontsize";
+import { IconArrowNarrowLeft } from '@tabler/icons-react-native';
+import { StyleProp, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 
-import { colors } from "@/constants";
-import { router } from "expo-router";
-import { SubTitle } from "@/components/typography/Subtitle";
-import React from "react";
+import { SubTitle } from '@/components/typography/Subtitle';
+import { router } from 'expo-router';
+import React from 'react';
 
 type NavHeaderProps = {
   title: string;
@@ -20,7 +19,7 @@ export const NavHeader = ({
   leftContent: LeftContent,
   style,
   avatarContent: AvatarContent,
-  color = "black",
+  color = 'black',
   onPress: handlePress,
 }: NavHeaderProps) => {
   const onPress = (): void => {
@@ -31,17 +30,17 @@ export const NavHeader = ({
     <View
       style={[
         {
-          flexDirection: "row",
-          justifyContent: "space-between",
+          flexDirection: 'row',
+          justifyContent: 'space-between',
           zIndex: 4,
-          alignItems: "center",
+          alignItems: 'center',
         },
         style,
       ]}
     >
       <TouchableOpacity
         onPress={onPress}
-        style={{ padding: 5, flexDirection: "row", alignItems: "center" }}
+        style={{ padding: 5, flexDirection: 'row', alignItems: 'center' }}
       >
         <IconArrowNarrowLeft color={color} size={30} />
         {AvatarContent && AvatarContent}
@@ -49,7 +48,7 @@ export const NavHeader = ({
       <SubTitle
         text={title}
         textStyle={{
-          fontFamily: "NunitoBold",
+          fontFamily: 'NunitoBold',
           fontSize: RFPercentage(2.5),
           color: color,
         }}

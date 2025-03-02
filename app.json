@@ -2,7 +2,7 @@
   "expo": {
     "name": "FPNO",
     "slug": "FPNO",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -16,8 +16,20 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.diegodark.nekede",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification", "fetch"]
+        "UIBackgroundModes": [
+          "remote-notification",
+          "fetch",
+          "remote-notification",
+          "fetch"
+        ],
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "$(PRODUCT_NAME) needs access to your location.",
+        "NSPhotoLibraryUsageDescription": "$(PRODUCT_NAME) would like access to your photo gallery to share image in a message."
+
       }
+
+
     },
     "android": {
       "adaptiveIcon": {
@@ -25,8 +37,13 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.diegodark.nekede",
-      "googleServicesFile": "./google-services.json"
-
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -47,6 +64,9 @@
           "android": {
             "enableProguardInReleaseBuilds": true,
             "enableShrinkResourcesInReleaseBuilds": true
+          },
+          "ios": {
+            "deploymentTarget": "18.0"
           }
         }
       ],

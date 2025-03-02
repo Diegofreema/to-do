@@ -1,16 +1,16 @@
-import { SubTitle } from '@/components/typography/Subtitle';
-import { Title } from '@/components/typography/Title';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { HStack } from '@/components/ui/HStack';
-import { colors } from '@/constants';
-import { useAuth } from '@/lib/zustand/useAuth';
-import { useStoreId } from '@/lib/zustand/useStoreId';
-import Modal from 'react-native-modal';
-import { RFPercentage } from 'react-native-responsive-fontsize';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { useId } from '@/lib/zustand/useId';
+import { SubTitle } from "@/components/typography/Subtitle";
+import { Title } from "@/components/typography/Title";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { HStack } from "@/components/ui/HStack";
+import { colors } from "@/constants";
+import { useAuth } from "@/lib/zustand/useAuth";
+import { useStoreId } from "@/lib/zustand/useStoreId";
+import Modal from "react-native-modal";
+import { RFPercentage } from "react-native-responsive-fontsize";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useId } from "@/lib/zustand/useId";
 
 type Props = {
   visible: boolean;
@@ -20,6 +20,7 @@ type Props = {
 export const LogoutModal = ({ onClose, visible }: Props): JSX.Element => {
   const removeUser = useAuth((state) => state.removeUser);
   const id = useId((state) => state.id);
+  console.log({ id });
   const removeDetails = useStoreId((state) => state.removeDetails);
   const setOffline = useMutation(api.user.setUserToOffline);
   const onClearDetails = useStoreId.persist.clearStorage;
@@ -54,17 +55,17 @@ export const LogoutModal = ({ onClose, visible }: Props): JSX.Element => {
         <Title
           text="Logout"
           textStyle={{
-            fontFamily: 'NunitoBold',
+            fontFamily: "NunitoBold",
             color: colors.black,
-            textAlign: 'center',
+            textAlign: "center",
           }}
         />
         <SubTitle
           text="Are you sure you want to log out?"
           textStyle={{
-            fontFamily: 'NunitoRegular',
+            fontFamily: "NunitoRegular",
             color: colors.black,
-            textAlign: 'center',
+            textAlign: "center",
             fontSize: RFPercentage(1.8),
           }}
         />
@@ -72,12 +73,12 @@ export const LogoutModal = ({ onClose, visible }: Props): JSX.Element => {
         <HStack
           gap={10}
           leftContent={() => (
-            <Button style={{ flex: 1 }} text={'Cancel'} onPress={onClose} />
+            <Button style={{ flex: 1 }} text={"Cancel"} onPress={onClose} />
           )}
           rightContent={() => (
             <Button
-              style={{ flex: 1, backgroundColor: 'red' }}
-              text={'Logout'}
+              style={{ flex: 1, backgroundColor: "red" }}
+              text={"Logout"}
               onPress={onPress}
             />
           )}

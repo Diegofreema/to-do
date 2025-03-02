@@ -7,9 +7,13 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { Avatar } from "./Avatar";
 import { colors } from "@/constants";
 import { Barcode } from "./Barcode";
+import { useAuth } from "@/lib/zustand/useAuth";
 
 export const IDModal = () => {
   const details = useStoreId((state) => state.details);
+  const data = useAuth((state) => state.user);
+  console.log({ details, data });
+  const fullName = `${data.fname} ${data.lname}`;
   return (
     <View style={styles.modal}>
       <View style={styles.top}>
@@ -34,22 +38,21 @@ export const IDModal = () => {
           paddingBottom: 20,
         }}
       >
-        <FlexText color="white" text="Full name" text2={details.student} />
+        <FlexText color="white" text="Full name" text2={fullName} />
         <FlexText
           color="white"
           text="Matric Number"
-          text2={details.matricnumber}
+          text2={data?.matricnumber}
         />
-        <FlexText color="white" text="Department" text2={details.department} />
-        <FlexText color="white" text="Program" text2={details.programtype} />
-
-        <FlexText color="white" text="Expiring Date" text2={details.exp} />
+        <FlexText color="white" text="Department" text2={data.Department} />
+        <FlexText color="white" text="Program" text2={data?.programtype} />
+        {/*<FlexText color="white" text="Expiring Date" text2={details.exp} />*/}
         <FlexText
           color="white"
           text="Matric Number"
-          text2={details.matricnumber}
+          text2={data.matricnumber}
         />
-        <FlexText color="white" text="Faculty" text2={details.faculty} />
+        <FlexText color="white" text="Faculty" text2={data.Faculty} />
       </View>
       <Barcode />
     </View>

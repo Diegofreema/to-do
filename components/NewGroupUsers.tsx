@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import { useNewGroupMembers } from "@/lib/zustand/useNewGroupMembers";
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { useNewGroupMembers } from '@/lib/zustand/useNewGroupMembers';
 import Animated, {
   LinearTransition,
   useAnimatedStyle,
@@ -7,14 +7,14 @@ import Animated, {
   withSpring,
   ZoomIn,
   ZoomOut,
-} from "react-native-reanimated";
-import { useEffect } from "react";
-import { NewConversationType } from "@/types";
-import { Image } from "expo-image";
-import { RFPercentage } from "react-native-responsive-fontsize";
-import { IconX } from "@tabler/icons-react-native";
-import { colors } from "@/constants";
-import { ScrollView } from "moti";
+} from 'react-native-reanimated';
+import { useEffect } from 'react';
+import { NewConversationType } from '@/types';
+import { Image } from 'expo-image';
+import { RFPercentage } from 'react-native-responsive-fontsize';
+import { IconX } from '@tabler/icons-react-native';
+import { colors } from '@/constants';
+import { ScrollView } from 'moti';
 
 const _layoutTransition = LinearTransition.springify()
   .damping(80)
@@ -35,7 +35,7 @@ export const NewGroupUsers = () => {
     } else {
       height.value = 0;
     }
-  }, [newMembers]);
+  }, [newMembers, height]);
   return (
     <Animated.View style={animatedStyle}>
       <ScrollView
@@ -68,7 +68,7 @@ export const NewGroupUser = ({
   return (
     <Animated.View
       layout={_layoutTransition}
-      style={{ alignItems: "center", flex: 1 }}
+      style={{ alignItems: 'center', flex: 1 }}
       entering={ZoomIn}
       exiting={ZoomOut}
     >
@@ -93,12 +93,12 @@ export const NewGroupUser = ({
 
 const styles = StyleSheet.create({
   abs: {
-    position: "absolute",
+    position: 'absolute',
     backgroundColor: colors.lightblue,
     borderRadius: 50,
     right: -5,
     padding: 5,
   },
-  text: { fontSize: RFPercentage(1.3), fontFamily: "NunitoRegular" },
+  text: { fontSize: RFPercentage(1.3), fontFamily: 'NunitoRegular' },
   image: { width: 60, height: 60, borderRadius: 50 },
 });

@@ -1,15 +1,13 @@
-/* eslint-disable prettier/prettier */
-
-import { useState } from "react";
+import { useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   View,
-} from "react-native";
-import { downloadAndSaveImage } from "@/helper";
-import { IconDownload } from "@tabler/icons-react-native";
-import { useShowToast } from "@/lib/zustand/useShowToast";
+} from 'react-native';
+import { downloadAndSaveImage } from '@/helper';
+import { IconDownload } from '@tabler/icons-react-native';
+import { useShowToast } from '@/lib/zustand/useShowToast';
 
 type Props = {
   url: string;
@@ -24,20 +22,20 @@ export const DownloadBlurView = ({ url, onClose }: Props) => {
     try {
       const result = await downloadAndSaveImage(url);
       onClose();
-      if (result === "saved") {
+      if (result === 'saved') {
         onShowToast({
-          message: "Success",
-          type: "success",
-          description: "Image has been downloaded",
+          message: 'Success',
+          type: 'success',
+          description: 'Image has been downloaded',
         });
       }
     } catch (e) {
       console.log(e);
       onClose();
       onShowToast({
-        message: "Failed",
-        type: "error",
-        description: "Could not download image",
+        message: 'Failed',
+        type: 'error',
+        description: 'Could not download image',
       });
     } finally {
       setDownloading(false);
@@ -58,16 +56,16 @@ export const DownloadBlurView = ({ url, onClose }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    position: "absolute",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    width: "100%",
+    width: '100%',
     height: 70,
     padding: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     zIndex: 3,
   },
 });
